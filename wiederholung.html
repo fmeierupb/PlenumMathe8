@@ -189,13 +189,15 @@ const join = arr => arr.filter(Boolean).join(' &nbsp;&nbsp; ');
 // ---------- Bahngleis: parallel und senkrecht ----------
 // Gleis von oben: Schwellen aus Holz, darauf zwei Schienen. Regelspur 1435 mm (BOA NRW § 6), Meterspur 1000 mm.
 const R1 = 190, R2 = 330;
-let sx = 300;
+// Markierte Schwellen. Vor dem ersten Antippen zeigt das Aufdecken die Schwelle bei x = 300.
+let sl = new Set(), touched = false;
+const marked = () => touched ? sl : vis('sleeper') ? new Set([300]) : new Set();
 function trackFig() {
-  const r = vis('rails'), q = vis('sleeper');
+  const r = vis('rails');
   let s = '';
   for (let x = 60; x <= 740; x += 80) s += `<rect class="wood" x="${x - 13}" y="150" width="26" height="220" rx="3"/>`;
   s += seg(P(30, R1), P(770, R1), r ? 'rail1' : 'rail') + seg(P(30, R2), P(770, R2), r ? 'rail1' : 'rail');
-  if (q) s += seg(P(sx, 150), P(sx, 370), 'g2') + rmark(P(sx, R1), 0, 24);
+  marked().forEach(x => { s += seg(P(x, 150), P(x, 370), 'g2') + rmark(P(x, R1), 0, 24); });
   if (!r) return s;
   [180, 580].forEach(x => {
     s += seg(P(x, R1 + 10), P(x, R2 - 10), 'da') + seg(P(x - 9, R1 + 10), P(x + 9, R1 + 10), 'thin') + seg(P(x - 9, R2 - 10), P(x + 9, R2 - 10), 'thin');
@@ -205,11 +207,14 @@ function trackFig() {
   return s;
 }
 // Schiene antippen: parallel. Schwelle antippen: diese Schwelle wird markiert, senkrecht.
-function trackHit(p) {
-  if (Math.abs(p.y - R1) < 26 || Math.abs(p.y - R2) < 26) return 'rails';
+const trackHit = p => Math.abs(p.y - R1) < 26 || Math.abs(p.y - R2) < 26 ? 'rails' : null;
+// Jede Schwelle einzeln an- und abwählen, beliebig viele.
+function trackTap(w, p) {
   const x = 60 + 80 * Math.round((p.x - 60) / 80);
-  if (p.y > 140 && p.y < 380 && x >= 60 && x <= 740 && Math.abs(p.x - x) < 28) { if (!vis('sleeper')) sx = x; return 'sleeper'; }
-  return null;
+  if (!(p.y > 140 && p.y < 380 && x >= 60 && x <= 740 && Math.abs(p.x - x) < 28)) return;
+  if (!touched) { sl = marked(); touched = true; }
+  if (sl.has(x)) sl.delete(x); else sl.add(x);
+  if (!shown) { if (sl.size) opened.add('sleeper'); else opened.delete('sleeper'); }
 }
 
 // ---------- Geraden erkennen ----------
@@ -303,9 +308,9 @@ const ZT = ['', 'Zeichne einen Schenkel und markiere den Scheitelpunkt S.',
 
 // ---------- Folien ----------
 const STEPS = [
-  { t: 'Ein Bahngleis', rv: 1, parts: ['rails', 'sleeper'], enter: () => { sx = 300; }, hit: trackHit, fig: trackFig,
+  { t: 'Ein Bahngleis', rv: 1, parts: ['rails', 'sleeper'], enter: () => { sl = new Set(); touched = false; }, hit: trackHit, tap: trackTap, fig: trackFig,
     txt: () => done() ? 'Die Schienen haben überall 1435 mm Abstand, sie sind parallel. Die Schwellen liegen senkrecht zu den Schienen.' : 'Ein Bahngleis von oben. Was fällt an den Schienen und Schwellen auf?',
-    eq: () => join([vis('rails') && 'Schiene 1 ∥ Schiene 2', vis('sleeper') && 'Schwelle ⊥ Schiene']) },
+    eq: () => join([vis('rails') && 'Schiene 1 ∥ Schiene 2', marked().size > 0 && 'Schwelle ⊥ Schiene']) },
   { t: 'Parallel oder senkrecht?', rv: 1, parts: ['par', 'perp', 'cut'], hit: linesHit, fig: linesFig,
     txt: () => done() ? 'Parallel heißt: überall gleicher Abstand. j und k kommen sich immer näher und schneiden sich. Sie sind nicht parallel.' : 'Welche Geraden sind zueinander parallel, welche senkrecht?',
     eq: () => join([vis('par') && 'f ∥ g', vis('perp') && 'h ⊥ f &nbsp;&nbsp; h ⊥ g', vis('cut') && 'j, k: nicht parallel']) },
