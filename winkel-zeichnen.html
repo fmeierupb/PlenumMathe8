@@ -145,25 +145,26 @@ function arc(c, a1, a2, r, cls = 'arc') {
   return `<path class="${cls}" d="M${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 ${d > 180 ? 1 : 0} 0 ${f(p2.x)} ${f(p2.y)}"/>`;
 }
 // Ganzes Geodreieck: gleichschenklig-rechtwinklig, lange Seite 16 cm, Nullpunkt c in ihrer Mitte, Spitze oben.
-// u: Bildpunkte pro cm. Winkelzahlen 10 bis 170, 0 und 180 stehen auf dem Geodreieck nicht.
+// Doppelt runde Winkelskala: Teilstriche am äußeren Bogen, zwei Zahlenreihen, innerer Bogen darunter.
+// Winkelzahlen 10 bis 170, 0 und 180 stehen auf dem Geodreieck nicht. u: Bildpunkte pro cm.
 // o.at: diese Zahl hervorheben, o.good: 'out' oder 'in' ist die richtige Skala. o.hi: Teile farbig hervorheben.
-const gR = (th, d) => (8 - d * Math.SQRT2) / (Math.abs(Math.cos(rad(th))) + Math.sin(rad(th)));
+const GRo = 5.5, GRi = 3.5;
 function geoTri(c, u, o = {}) {
-  const Q = (x, y) => P(c.x + x * u, c.y - y * u), A = (th, d) => pol(gR(th, d) * u, th, c), hi = o.hi || {};
+  const Q = (x, y) => P(c.x + x * u, c.y - y * u), A = (th, r) => pol(r * u, th, c), hi = o.hi || {};
   let s = poly([Q(-8, 0), Q(8, 0), Q(0, 8)], 'geo') + poly([Q(-8, 0), Q(8, 0), Q(0, 8)], 'geoL');
-  for (let h = 1; h <= 5; h += 0.5) { const w = 4.9 - h; if (w > 0.3) s += seg(Q(-w, h), Q(w, h), hi.hilfs ? 'ghh' : 'gh'); }
-  s += seg(Q(0, 0.85), Q(0, 6), hi.mitte ? 'ghh' : 'gh');
+  s += arc(c, 0, 180, GRo * u, 'geoL') + arc(c, 0, 180, GRi * u, 'geoL');
+  for (let h = 1; h <= 3; h += 0.5) { const w = Math.sqrt(GRi * GRi - h * h) - 0.3; s += seg(Q(-w, h), Q(w, h), hi.hilfs ? 'ghh' : 'gh'); }
+  s += seg(Q(0, 0.85), Q(0, GRi), hi.mitte ? 'ghh' : 'gh');
   for (let i = -70; i <= 70; i++) s += seg(Q(i / 10, 0), Q(i / 10, i % 10 ? (i % 5 ? 0.14 : 0.24) : 0.34), 'tick');
   for (let i = -7; i <= 7; i++) s += text(Q(i, 0.55), Math.abs(i), hi.cm ? 'tkh' : 'tkc');
-  for (let th = 6; th <= 174; th++) s += seg(A(th, 0.08), A(th, 0.08 + (th % 10 ? (th % 5 ? 0.14 : 0.24) : 0.4)), 'tick');
+  for (let th = 1; th <= 179; th++) s += seg(A(th, GRo), A(th, GRo - (th % 10 ? (th % 5 ? 0.14 : 0.24) : 0.4)), 'tick');
   for (let k = 10; k <= 170; k += 10) {
     if (o.at === k) continue;
-    s += text(A(k, 0.75), k, hi.aussen ? 'tkh' : 'tk');
-    if (k !== 90) s += text(A(k, 1.27), 180 - k, hi.innen ? 'tkh' : 'tki');
+    s += text(A(k, GRo - 0.72), k, hi.aussen ? 'tkh' : 'tk') + text(A(k, GRo - 1.25), 180 - k, hi.innen ? 'tkh' : 'tki');
   }
   if (o.at !== undefined) {
     const k = o.at, gi = o.good === 'in';
-    s += text(A(k, 0.72), k, gi ? 'tkr' : 'tkb') + text(A(k, 1.4), 180 - k, gi ? 'tkb' : 'tkr');
+    s += text(A(k, GRo - 0.7), k, gi ? 'tkr' : 'tkb') + text(A(k, GRo - 1.32), 180 - k, gi ? 'tkb' : 'tkr');
   }
   return s + circ(c, 5, 'geoL');
 }
@@ -186,18 +187,17 @@ function geoFig() {
   return s;
 }
 function geoHit(p) {
-  const x = (p.x - GV.x) / GU, y = (GV.y - p.y) / GU, ax = Math.abs(x);
-  if (Math.hypot(x, y) < 0.7) return 'null';
+  const x = (p.x - GV.x) / GU, y = (GV.y - p.y) / GU, ax = Math.abs(x), r = Math.hypot(x, y);
+  if (r < 0.7) return 'null';
   if (Math.abs(y) < 0.12 && ax <= 8.2) return 'kante';
   if (y < 0 && y > -1.4 && ax <= 8.2) return x >= 0 ? 'kante' : 'cm';
   if (y > 0 && y < 0.85 && ax < 7.6) return 'cm';
   if (y <= 0) return null;
-  if (ax < 0.35 && y < 6.2) return 'mitte';
-  const d = (8 - ax - y) / Math.SQRT2;
-  if (d < -3.5) return null;
-  if (d < 1.0) return d < 0 && x < 0 ? 'innen' : 'aussen';
-  if (d < 1.6) return 'innen';
-  return y <= 5.2 ? 'hilfs' : null;
+  if (r < GRi) return ax < 0.35 ? 'mitte' : 'hilfs';
+  if (r < GRo - 1.0) return 'innen';
+  if (r < GRo + 0.3) return 'aussen';
+  if (8 - ax - y > 0) return null;
+  return x < 0 ? 'innen' : 'aussen';
 }
 
 // ---------- Winkel Schritt für Schritt zeichnen ----------
@@ -208,8 +208,8 @@ function drawFig(a, d0) {
   const d1 = d0 === 0 ? a : 180 - a, lo = Math.min(d0, d1), hi = Math.max(d0, d1);
   let s = ray(ZV, d0, 330) + dot(ZV, 7) + text(P(ZV.x, ZV.y + 32), 'S', 'tx');
   if (zs === 2 || zs === 3) s += geoTri(ZV, 41, zs === 3 ? { at: d1, good: d0 === 0 ? 'out' : 'in' } : {});
-  if (zs === 3) s += dot(pol(gR(d1, -0.3) * 41, d1, ZV), 8, 'mk');
-  if (zs >= 4) s += ray(ZV, d1, 330) + dot(pol(gR(d1, -0.3) * 41, d1, ZV), 6, 'mk');
+  if (zs === 3) s += dot(pol((GRo + 0.35) * 41, d1, ZV), 8, 'mk');
+  if (zs >= 4) s += ray(ZV, d1, 330) + dot(pol((GRo + 0.35) * 41, d1, ZV), 6, 'mk');
   if (zs === 5) s += wedge(ZV, lo, hi, 60, 'c1', `α = ${a}°`, 'tx', 160) + arc(ZV, lo, hi, 60);
   return s;
 }
