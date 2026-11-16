@@ -288,24 +288,6 @@ function measureFig(show) {
     + ray(MV, 180, 300) + ray(MV, MW, 120) + seg(pol(120, MW, MV), pol(285, MW, MV), 'da') + dot(MV, 7);
 }
 
-// ---------- Winkel zeichnen ----------
-const zw = 130;
-let zs = 1;
-const ZV = P(400, 430);
-function drawFig() {
-  let s = ray(ZV, 0, 330) + dot(ZV, 7) + text(P(ZV.x - 4, ZV.y + 30), 'S', 'tx');
-  if (zs === 2 || zs === 3) s += geo(ZV, 0, 250, zs === 3 ? { at: zw, good: 'out' } : {});
-  if (zs === 3) s += dot(pol(262, zw, ZV), 8, 'mk');
-  if (zs >= 4) s += ray(ZV, zw, 330) + dot(pol(262, zw, ZV), 6, 'mk');
-  if (zs === 5) s += wedge(ZV, 0, zw, 60, 'c1', `α = ${zw}°`, 'tx', 160) + arc(ZV, 0, zw, 60);
-  return s;
-}
-const ZT = ['', 'Zeichne einen Schenkel und markiere den Scheitelpunkt S.',
-  'Leg das Geodreieck an: Nullpunkt auf S, 0-Linie auf den Schenkel.',
-  'Markiere einen Punkt bei der Zahl. Lies auf der Skala, die am Schenkel bei 0° beginnt.',
-  'Nimm das Geodreieck weg und verbinde S mit dem Punkt.',
-  'Zeichne den Winkelbogen und beschrifte den Winkel.'];
-
 // ---------- Folien ----------
 const STEPS = [
   { t: 'Ein Bahngleis', rv: 1, parts: ['rails', 'sleeper'], enter: () => { sl = new Set(); touched = false; }, hit: trackHit, tap: trackTap, fig: trackFig,
@@ -321,9 +303,7 @@ const STEPS = [
     txt: () => done() ? 'Genau 90° ist ein rechter Winkel. Die Grenzen sind 90° und 180°.' : 'Wie heißen diese Winkelarten?' },
   { t: 'Winkel messen', rv: 1, fig: () => measureFig(shown),
     txt: () => shown ? 'Lies auf der Skala ab, die an deinem ersten Schenkel bei 0° beginnt.' : 'Nullpunkt auf den Scheitelpunkt, 0-Linie auf einen Schenkel, kurzen Schenkel verlängern. Welche Zahl stimmt?',
-    eq: () => shown ? `α = ${MA}°, denn der Winkel ist spitz.` : '' },
-  { t: 'Winkel zeichnen', enter: () => { zs = 1; }, fig: drawFig, txt: () => `Schritt ${zs}: ${ZT[zs]}`, eq: () => `α = ${zw}°`,
-    btns: [{ l: 'Nächster Schritt', f: () => { zs = Math.min(5, zs + 1); }, dis: () => zs === 5 }] }
+    eq: () => shown ? `α = ${MA}°, denn der Winkel ist spitz.` : '' }
 ];
 
 // ---------- Ablauf ----------

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mathe 8">
+<meta name="theme-color" content="#0f766e">
+<title>Winkel zeichnen</title>
+<style>
+:root{--bg:#fbfaf6;--fg:#161a22;--mut:#9aa0ad;--line:#d9d7cf;--c1:#2563eb;--c2:#f08a00;--c3:#12a150;--btn:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#12151b;--fg:#f0f2f6;--mut:#7d8596;--line:#343b48;--c1:#5b9bff;--c2:#ffad33;--c3:#3ddc84;--btn:#1f242d}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{display:flex;flex-direction:column;height:100dvh;padding:12px 16px calc(12px + env(safe-area-inset-bottom));user-select:none;-webkit-user-select:none}
+h1{margin:0;font-size:clamp(26px,4.2vw,52px);line-height:1.15;min-height:1.2em}
+#fig{flex:1;min-height:0;width:100%;touch-action:none}
+#txt{font-size:clamp(18px,2.6vw,32px);min-height:1.4em;text-align:center}
+#eq{font-size:clamp(22px,3.6vw,44px);font-weight:700;min-height:1.4em;text-align:center;font-variant-numeric:tabular-nums;line-height:1.35}
+#eq .dim{opacity:.4;font-size:.8em}
+footer{display:flex;gap:10px;align-items:center;margin-top:10px}
+#extras{display:flex;gap:10px;margin:0 auto}
+button{font:inherit;font-size:clamp(16px,2vw,24px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.3}
+#menu{font:inherit;font-size:clamp(16px,2vw,24px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;text-decoration:none}
+#fs svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.15em}
+#fs .fo,html.fs #fs .fi{display:none}
+html.fs #fs .fo{display:inline}
+#cnt{color:var(--mut);font-size:clamp(14px,1.6vw,20px);min-width:3.5em;text-align:center}
+#next{background:var(--c1);border-color:var(--c1);color:#fff;font-weight:700}
+footer{flex-wrap:wrap;row-gap:8px}
+#extras{flex-wrap:wrap;justify-content:center}
+#extras:empty{display:none}
+/* Handy hochkant: Zusatzknöpfe in eine eigene Zeile, Zurück nur als Pfeil. Was trotzdem nicht passt, bricht um, statt aus dem Bild zu rutschen. */
+@media (max-width:700px){#extras{order:9;flex-basis:100%;margin:0}#next{margin-left:auto}footer{gap:8px}button,#menu{padding:10px 12px}#cnt{min-width:0}}
+@media (max-width:420px){#prev .lbl{display:none}}
+svg .ln{stroke:var(--fg);stroke-width:5;stroke-linecap:round;fill:none}
+svg .thin{stroke:var(--fg);stroke-width:3;stroke-linecap:round;fill:none}
+svg .da{stroke:var(--mut);stroke-width:3;stroke-dasharray:12 9;fill:none}
+svg .hi{stroke:var(--c3);stroke-width:5;stroke-linecap:round;fill:none}
+svg .zk{stroke:var(--c2);stroke-width:3;stroke-dasharray:10 8;fill:none}
+svg .wd{stroke:none}
+svg .n{fill:var(--mut);opacity:.3}
+svg .c1{fill:var(--c1);opacity:.62}
+svg .c2{fill:var(--c2);opacity:.62}
+svg .c3{fill:var(--c3);opacity:.62}
+svg .cr{fill:#d81e1e;opacity:.62}
+svg .tx{fill:var(--fg);font:700 30px system-ui,sans-serif}
+svg .ts{fill:var(--mut);font:600 24px system-ui,sans-serif}
+svg .tr{fill:#d81e1e}
+svg .tc1{fill:var(--c1)}
+svg .tc3{fill:var(--c3)}
+svg .pt{fill:var(--fg)}
+svg .mk{fill:var(--c3)}
+svg .hd{fill:var(--c1);opacity:.28}
+svg .ip{fill:var(--c2)}
+svg .geo{fill:var(--c1);opacity:.07;stroke:none}
+svg .geoL{stroke:var(--c1);stroke-width:2;fill:none;opacity:.7}
+svg .tick{stroke:var(--c1);stroke-width:1.6;opacity:.8}
+svg .tk{fill:var(--c1);font:600 15px system-ui,sans-serif;opacity:.85}
+svg .tki{fill:var(--mut);font:600 13px system-ui,sans-serif}
+svg .tkb{fill:var(--c1);font:800 24px system-ui,sans-serif}
+svg .tkr{fill:#d81e1e;font:800 24px system-ui,sans-serif}
+svg .tm{fill:var(--fg);font:700 24px system-ui,sans-serif}
+svg .tn{fill:var(--fg);font:600 20px system-ui,sans-serif}
+svg .arc{stroke:var(--c1);stroke-width:4;fill:none}
+svg .harc{stroke:var(--c3);stroke-width:8;stroke-linecap:round;fill:none}
+</style>
+</head>
+<body>
+<h1 id="title"></h1>
+<svg id="fig" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg"></svg>
+<div id="txt"></div>
+<div id="eq"></div>
+<footer>
+  <a id="menu" href="./">Menü</a><button id="fs" aria-label="Vollbild" title="Vollbild (F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fi" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="fo" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg></button><button id="prev" aria-label="Zurück">‹<span class="lbl"> Zurück</span></button><span id="cnt"></span>
+  <div id="extras"></div>
+  <button id="next">Weiter ›</button>
+</footer>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+const P = (x, y) => ({ x, y });
+const M = P(400, 260);
+// Winkel mathematisch: gegen den Uhrzeigersinn, 0° zeigt nach rechts.
+const pol = (r, w, c = M) => P(c.x + r * Math.cos(rad(w)), c.y - r * Math.sin(rad(w)));
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const dirOf = (c, p) => (deg(Math.atan2(-(p.y - c.y), p.x - c.x)) + 360) % 360;
+const f = n => n.toFixed(1);
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[rnd(0, a.length - 1)];
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lines = (arr, n = arr.length) => arr.slice(0, n).map((l, i) => `<div class="${i < n - 1 ? 'dim' : ''}">${l}</div>`).join('');
+const text = (p, s, c = 'tx') => `<text class="${c}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="middle" dominant-baseline="central">${s}</text>`;
+const seg = (p, q, c = 'ln') => `<line class="${c}" x1="${f(p.x)}" y1="${f(p.y)}" x2="${f(q.x)}" y2="${f(q.y)}"/>`;
+const dot = (p, r = 8, c = 'pt') => `<circle class="${c}" cx="${f(p.x)}" cy="${f(p.y)}" r="${r}"/>`;
+const circ = (m, r, c = 'thin') => `<circle class="${c}" cx="${f(m.x)}" cy="${f(m.y)}" r="${f(r)}"/>`;
+const handle = p => `<circle class="hd" cx="${f(p.x)}" cy="${f(p.y)}" r="22"/>` + dot(p, 8);
+const poly = (ps, c = 'ln') => `<polygon class="${c}" points="${ps.map(p => f(p.x) + ',' + f(p.y)).join(' ')}"/>`;
+// Gerade durch p mit Richtung w, über das Bild hinaus verlängert.
+const xline = (p, w, c = 'ln') => seg(pol(900, w, p), pol(900, w + 180, p), c);
+// Winkelfläche gegen den Uhrzeigersinn von a1 nach a2, Beschriftung außerhalb des Bogens.
+function wedge(c, a1, a2, r, cls, label, tcls = 'tx', cap = 250) {
+  let d = ((a2 - a1) % 360 + 360) % 360; if (d === 0 && a2 !== a1) d = 360; if (d <= 0) return '';
+  const p1 = pol(r, a1, c), p2 = pol(r, a1 + d, c);
+  let s = d >= 360 ? `<circle class="wd ${cls}" cx="${f(c.x)}" cy="${f(c.y)}" r="${r}"/>`
+    : `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 ${d > 180 ? 1 : 0} 0 ${f(p2.x)} ${f(p2.y)}Z"/>`;
+  if (label) {
+    const half = String(label).length * 8.5 + 8;
+    const lr = Math.min(cap, Math.max(r + 40, half / Math.tan(rad(Math.min(d, 178) / 2))));
+    s += text(pol(lr, a1 + d / 2, c), label, tcls);
+  }
+  return s;
+}
+// Innenwinkel an Ecke v zwischen den Strahlen zu p und q (kleinerer Winkel).
+function inner(v, p, q, r, cls, label, tcls, cap) {
+  let a1 = dirOf(v, p), a2 = dirOf(v, q);
+  if (((a2 - a1) % 360 + 360) % 360 > 180) [a1, a2] = [a2, a1];
+  return wedge(v, a1, a2, r, cls, label, tcls, cap);
+}
+const angleAt = (v, p, q) => { const d = Math.abs(dirOf(v, p) - dirOf(v, q)); return d > 180 ? 360 - d : d; };
+const cm = px => (Math.round(px / 5) / 10).toFixed(1).replace('.', ',');
+// Beschriftung eines Innenwinkels außen an der Ecke v, damit sie auch bei spitzen Winkeln lesbar bleibt.
+function outLab(v, p, q, s, cls = 'tx') {
+  const a1 = dirOf(v, p), a2 = dirOf(v, q), d = ((a2 - a1) % 360 + 360) % 360;
+  const w = (d <= 180 ? a1 + d / 2 : a2 + (360 - d) / 2) + 180, ux = Math.cos(rad(w)), uy = Math.sin(rad(w)), hw = 8.5 * String(s).length;
+  const pt = pol(26 + hw * Math.abs(ux) + 16 * Math.abs(uy), w, v);
+  return text(P(clamp(pt.x, hw + 6, 794 - hw), clamp(pt.y, 18, 502)), s, cls);
+}
+
+// ---------- Hilfen ----------
+const ray = (v, w, len, c = 'ln') => seg(v, pol(len, w, v), c);
+// Winkelbogen als Linie, gegen den Uhrzeigersinn von a1 nach a2
+function arc(c, a1, a2, r, cls = 'arc') {
+  const d = ((a2 - a1) % 360 + 360) % 360, p1 = pol(r, a1, c), p2 = pol(r, a1 + d, c);
+  return `<path class="${cls}" d="M${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 ${d > 180 ? 1 : 0} 0 ${f(p2.x)} ${f(p2.y)}"/>`;
+}
+// Geodreieck als Halbkreis: Mittelpunkt c, 0-Linie in Richtung base. Außen zählt die Skala ab base, innen von der Gegenseite.
+// o.at: Richtung (0 bis 180 ab base), an der beide Zahlen hervorgehoben werden. o.good: 'out' oder 'in' ist richtig.
+function geo(c, base, r, o = {}) {
+  const a = pol(r, base, c), b = pol(r, base + 180, c);
+  let s = `<path class="geo" d="M${f(a.x)} ${f(a.y)}A${r} ${r} 0 0 0 ${f(b.x)} ${f(b.y)}Z"/>` + arc(c, base, base + 180, r, 'geoL') + seg(a, b, 'geoL');
+  const every = r >= 200 ? 10 : 30;
+  for (let k = 0; k <= 180; k += 5) {
+    const w = base + k;
+    s += seg(pol(r, w, c), pol(r - (k % 10 ? 8 : 15), w, c), 'tick');
+    if (k % every === 0 && o.at !== k) s += text(pol(r - 30, w, c), k, 'tk') + text(pol(r - 54, w, c), 180 - k, 'tki');
+  }
+  s += seg(pol(26, base + 90, c), c, 'geoL') + circ(c, 5, 'geoL');
+  if (o.at !== undefined) {
+    const w = base + o.at;
+    s += text(pol(r - 30, w, c), o.at, o.good === 'in' ? 'tkr' : o.good ? 'tkb' : 'tm') + text(pol(r - 58, w, c), 180 - o.at, o.good === 'in' ? 'tkb' : o.good ? 'tkr' : 'tm');
+  }
+  return s;
+}
+
+// ---------- Das Geodreieck ----------
+// Teile einzeln antippen: Nullpunkt, Zeichenkante, äußere Skala, innere Skala.
+const GV = P(400, 430), GR = 290;
+function geoFig() {
+  let s = geo(GV, 0, GR);
+  if (vis('kante')) s += seg(pol(GR, 180, GV), pol(GR, 0, GV), 'hi') + text(P(GV.x + 185, GV.y + 40), 'Zeichenkante', 'tm');
+  if (vis('null')) s += circ(GV, 16, 'hi') + text(P(GV.x - 10, GV.y + 40), 'Nullpunkt', 'tm');
+  if (vis('aussen')) s += arc(GV, 3, 47, GR + 14, 'harc') + text(pol(GR + 58, 56, GV), 'äußere Skala', 'tm');
+  if (vis('innen')) s += arc(GV, 133, 177, GR - 78, 'harc') + text(pol(130, 140, GV), 'innere Skala', 'tm');
+  return s;
+}
+function geoHit(p) {
+  const r = dist(p, GV);
+  if (r < 40) return 'null';
+  if (Math.abs(p.y - GV.y) < 26 && Math.abs(p.x - GV.x) <= GR + 10) return 'kante';
+  if (p.y > GV.y) return null;
+  if (r >= GR - 42 && r < GR + 45) return 'aussen';
+  if (r >= GR - 110 && r < GR - 42) return 'innen';
+  return null;
+}
+
+// ---------- Winkel Schritt für Schritt zeichnen ----------
+// d0: Richtung des ersten Schenkels (0 nach rechts, 180 nach links). Das Geodreieck liegt immer mit 0 nach rechts.
+const ZV = P(400, 430);
+let zs = 1;
+function drawFig(a, d0) {
+  const d1 = d0 === 0 ? a : 180 - a, lo = Math.min(d0, d1), hi = Math.max(d0, d1);
+  let s = ray(ZV, d0, 330) + dot(ZV, 7) + text(P(ZV.x, ZV.y + 32), 'S', 'tx');
+  if (zs === 2 || zs === 3) s += geo(ZV, 0, 250, zs === 3 ? { at: d1, good: d0 === 0 ? 'out' : 'in' } : {});
+  if (zs === 3) s += dot(pol(262, d1, ZV), 8, 'mk');
+  if (zs >= 4) s += ray(ZV, d1, 330) + dot(pol(262, d1, ZV), 6, 'mk');
+  if (zs === 5) s += wedge(ZV, lo, hi, 60, 'c1', `α = ${a}°`, 'tx', 160) + arc(ZV, lo, hi, 60);
+  return s;
+}
+const drawTxt = (a, d0) => ['',
+  'Zeichne einen Schenkel und markiere den Scheitelpunkt S.',
+  'Leg das Geodreieck an: Nullpunkt auf S, Zeichenkante auf den Schenkel.',
+  `Markiere einen Punkt bei ${a}°. Nimm die ${d0 === 0 ? 'äußere' : 'innere'} Skala, denn sie beginnt an deinem Schenkel bei 0°.`,
+  'Nimm das Geodreieck weg und verbinde S mit dem Punkt.',
+  'Zeichne den Winkelbogen und beschrifte den Winkel.'][zs];
+const stepBtn = n => [{ l: 'Nächster Schritt', f: () => { zs = Math.min(n, zs + 1); }, dis: () => zs === n }];
+
+// ---------- Welche Skala? ----------
+// Aufgabe 40°. A hat richtig gezeichnet, B hat die falsche Skala genommen und 140° gezeichnet.
+const KA = P(170, 380), KB = P(600, 380);
+function checkFig() {
+  let s = '';
+  [[KA, 40, 'A'], [KB, 140, 'B']].forEach(([V, w, n]) => {
+    s += wedge(V, 0, w, 52, 'c1') + ray(V, 0, 190) + ray(V, w, 180) + dot(V, 7) + text(P(V.x + 95, 110), n, 'tx');
+  });
+  if (vis('a')) s += text(P(KA.x + 95, 450), '40°, spitz: richtig', 'tkb');
+  if (vis('b')) s += text(P(KB.x + 20, 450), '140°, stumpf: falsche Skala', 'tkr');
+  return s;
+}
+const checkHit = p => p.y > 80 && p.y < 490 ? (p.x < 400 ? 'a' : 'b') : null;
+
+// ---------- Überstumpfer Winkel ----------
+const UV = P(400, 290);
+function reflexFig() {
+  let s = ray(UV, 0, 300) + dot(UV, 7) + text(P(UV.x - 4, UV.y + 32), 'S', 'tx');
+  if (zs >= 2) s += wedge(UV, 0, 60, 60, 'n', '60°', 'tx') + ray(UV, 60, 220);
+  if (zs === 3) s += wedge(UV, 60, 360, 75, 'c1') + arc(UV, 60, 360, 75) + text(pol(150, 220, UV), 'α = 300°', 'tx');
+  return s;
+}
+const RT = ['', 'Rechne: 360° − 300° = 60°.', 'Zeichne 60° wie gewohnt.', 'Der Winkel außen herum ist 300°. Zeichne den Bogen außen herum und beschrifte ihn.'];
+
+// ---------- Folien ----------
+const STEPS = [
+  { t: 'Das Geodreieck', rv: 1, parts: ['null', 'kante', 'aussen', 'innen'], hit: geoHit, fig: geoFig,
+    txt: () => done() ? 'Die äußere Skala beginnt rechts bei 0°, die innere links. Lies immer die Skala, die an deinem ersten Schenkel bei 0° beginnt.' : 'Wie heißen die Teile des Geodreiecks?' },
+  { t: 'Spitzen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(40, 0), txt: () => `Schritt ${zs}: ${drawTxt(40, 0)}`, eq: () => 'α = 40°', btns: stepBtn(5) },
+  { t: 'Stumpfen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(130, 180), txt: () => `Schritt ${zs}: ${drawTxt(130, 180)}`, eq: () => 'α = 130°', btns: stepBtn(5) },
+  { t: 'Welche Skala?', rv: 1, parts: ['a', 'b'], hit: checkHit, fig: checkFig,
+    txt: () => done() ? '40° ist spitz. Sieht dein Winkel stumpf aus, hast du die falsche Skala genommen.' : 'Die Aufgabe war: Zeichne α = 40°. Wer hat richtig gezeichnet?',
+    eq: () => vis('b') ? '180° − 40° = 140°' : '' },
+  { t: 'Überstumpfen Winkel zeichnen', enter: () => { zs = 1; }, fig: reflexFig, txt: () => `Schritt ${zs}: ${RT[zs]}`,
+    eq: () => zs === 1 ? '360° − 300° = 60°' : 'α = 300°', btns: stepBtn(3) }
+];
+
+// ---------- Ablauf ----------
+let step = 0, pair = 0, shown = false, shownStep = -1;
+// Einzeln antippbare Lösungen: st.parts nennt die Teile, st.hit(p) liefert den getroffenen Teil.
+let opened = new Set();
+const vis = k => shown || opened.has(k);
+const done = (st = STEPS[step]) => shown || !!(st.parts && st.parts.every(k => opened.has(k)));
+function flip(k) {
+  if (shown) { shown = false; opened = new Set(STEPS[step].parts); }
+  if (opened.has(k)) opened.delete(k); else opened.add(k);
+}
+function render() {
+  const st = STEPS[step];
+  $('title').textContent = typeof st.t === 'function' ? st.t() : st.t;
+  $('fig').innerHTML = st.fig();
+  $('txt').textContent = typeof st.txt === 'function' ? st.txt() : st.txt || '';
+  $('eq').innerHTML = st.eq ? st.eq() : '';
+  if (shownStep !== step) {
+    shownStep = step;
+    $('extras').innerHTML = (st.btns || []).map((b, i) => `<button data-b="${i}">${b.l}</button>`).join('');
+    $('cnt').textContent = `${step + 1} / ${STEPS.length}`;
+    $('prev').disabled = step === 0;
+  }
+  $('next').disabled = step === STEPS.length - 1 && !(st.rv && !done(st));
+  const bs = $('extras').children || [];
+  for (let i = 0; i < bs.length; i++) bs[i].disabled = !!(st.btns[i].dis && st.btns[i].dis());
+}
+function go(d) {
+  const n = step + d; if (n < 0 || n >= STEPS.length) return;
+  step = n; pair = 0; shown = false; opened = new Set();
+  if (typeof onGo === 'function') onGo();
+  if (STEPS[step].enter) STEPS[step].enter();
+  render();
+}
+$('prev').addEventListener('click', () => go(-1));
+// Bei Folien mit verdecktem Ergebnis deckt der erste Druck auf, der zweite geht weiter.
+const fwd = () => { const st = STEPS[step]; if (st.rv && !done(st)) { shown = true; render(); } else go(1); };
+$('next').addEventListener('click', fwd);
+$('extras').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  STEPS[step].btns[+b.dataset.b].f(); render();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); fwd(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+});
+
+const fig = $('fig'); let down = false, pend = null;
+// Zeigerposition in Bildkoordinaten, auch wenn das Bild mit Rand eingepasst ist.
+function svgPt(e) {
+  const r = fig.getBoundingClientRect(), sc = Math.min(r.width / 800, r.height / 520);
+  return P((e.clientX - r.left - (r.width - 800 * sc) / 2) / sc, (e.clientY - r.top - (r.height - 520 * sc) / 2) / sc);
+}
+const ctr = st => typeof st.c === 'function' ? st.c() : st.c || M;
+fig.addEventListener('pointerdown', e => {
+  const st = STEPS[step], p = svgPt(e), w = dirOf(ctr(st), p);
+  const k = st.hit && st.hit(p);
+  if (k) {
+    if (!st.drag) { flip(k); return render(); }
+    // Auf ziehbaren Folien entscheidet erst die Bewegung: Tippen deckt auf, Ziehen zieht.
+    pend = { k, p }; try { fig.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); return;
+  }
+  if (st.tap) { st.tap(w, p); return render(); }
+  if (!st.drag) return;
+  if (st.down && st.down(p) === false) return;
+  down = true; try { fig.setPointerCapture(e.pointerId); } catch (x) {}
+  st.drag(w, p); render(); e.preventDefault();
+});
+fig.addEventListener('pointermove', e => {
+  const st = STEPS[step];
+  if (pend) {
+    const p = svgPt(e); if (dist(p, pend.p) < 10) return;
+    pend = null; if (st.down && st.down(p) === false) return;
+    down = true; st.drag(dirOf(ctr(st), p), p); return render();
+  }
+  if (down && st.drag) { const p = svgPt(e); st.drag(dirOf(ctr(st), p), p); render(); } });
+const up = () => { if (pend) { flip(pend.k); pend = null; return render(); } if (down) { down = false; const st = STEPS[step]; if (st.up) { st.up(); render(); } } };
+fig.addEventListener('pointerup', up); fig.addEventListener('pointercancel', () => { pend = null; up(); });
+if (typeof onGo === 'function') onGo();
+if (STEPS[0].enter) STEPS[0].enter();
+render();
+// Vollbild: Knopf oder Taste F. Nach einem Seitenwechsel holt der erste Tipp das Vollbild zurück.
+(() => {
+  const d = document, el = d.documentElement, b = d.getElementById('fs');
+  if (!b) return;
+  // Als App vom Home-Bildschirm gibt es keine Browserleisten. Vollbild brächte dort nur das X oben links.
+  const app = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  if (app || !(d.fullscreenEnabled || d.webkitFullscreenEnabled)) { b.hidden = true; return; }
+  const on = () => !!(d.fullscreenElement || d.webkitFullscreenElement);
+  const want = v => { try { if (v === undefined) return sessionStorage.getItem('fs') === '1'; sessionStorage.setItem('fs', v ? '1' : '0'); } catch (e) { return false; } };
+  const call = (o, f) => { if (!f) return; try { const p = f.call(o); if (p && p.catch) p.catch(() => {}); } catch (e) {} };
+  const enter = () => call(el, el.requestFullscreen || el.webkitRequestFullscreen);
+  const exit = () => call(d, d.exitFullscreen || d.webkitExitFullscreen);
+  const toggle = () => { if (on()) { want(false); exit(); } else { want(true); enter(); } };
+  let leaving = false;
+  const sync = () => {
+    const f = on(); el.classList.toggle('fs', f); if (!f) el.classList.remove('wide');
+    b.setAttribute('aria-pressed', f); b.title = f ? 'Vollbild beenden (F)' : 'Vollbild (F)';
+  };
+  const change = () => { sync(); if (!on() && !leaving) want(false); };   // mit X oder Esc beendet
+  b.addEventListener('click', toggle);
+  d.addEventListener('fullscreenchange', change);
+  d.addEventListener('webkitfullscreenchange', change);
+  d.addEventListener('click', e => {
+    const a = e.target.closest('a[href]');
+    if (a) { if (!a.hasAttribute('download')) leaving = true; return; }
+    if (!b.contains(e.target) && !on() && want()) enter();
+  }, true);
+  d.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggle(); }
+    else if (e.key !== 'Escape' && !on() && want()) enter();
+  });
+  addEventListener('pagehide', () => { leaving = true; });
+  addEventListener('pageshow', () => { leaving = false; sync(); });
+  sync();
+})();
+// App vom Home-Bildschirm: Sie hat keine Zurück-Taste. Links führen deshalb nur zu eigenen Seiten, und die haben alle einen Weg zum Menü.
+if (navigator.standalone === true || matchMedia('(display-mode: standalone)').matches) document.addEventListener('click', e => {
+  const a = e.target.closest('a[href]'); if (!a) return;
+  const u = new URL(a.href);
+  if (a.hasAttribute('download') || u.origin !== location.origin || !/(\/|\.html)$/.test(u.pathname)) e.preventDefault();
+}, true);
+// Offline: Nach dem ersten Aufruf liegen alle Stunden und Arbeitsblätter im Speicher.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
