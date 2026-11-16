@@ -73,6 +73,7 @@ svg .gh{stroke:var(--c1);stroke-width:1.4;opacity:.45}
 svg .ghh{stroke:var(--c3);stroke-width:3}
 svg .tkc{fill:var(--c1);font:600 13px system-ui,sans-serif;opacity:.85}
 svg .tkh{fill:var(--c3);font:800 16px system-ui,sans-serif}
+svg .lead{stroke:var(--fg);stroke-width:1.8;fill:none}
 </style>
 </head>
 <body>
@@ -173,17 +174,27 @@ function geoTri(c, u, o = {}) {
 // Teile einzeln antippen: Nullpunkt, Zeichenkante, äußere Skala, innere Skala.
 const GV = P(400, 440), GU = 41;
 const GP = ['null', 'kante', 'cm', 'aussen', 'innen', 'mitte', 'hilfs'];
+// Beschriftung mit Hinweislinie: pts vom Ziel zum Beschriftungsende in cm-Koordinaten. side: +1 Text rechts, -1 links, 0 darunter.
+function callout(Q, pts, label, side) {
+  const ps = pts.map(([x, y]) => Q(x, y)), e = ps[ps.length - 1];
+  let s = `<polyline class="lead" points="${ps.map(p => f(p.x) + ',' + f(p.y)).join(' ')}"/>` + dot(ps[0], 4);
+  if (side === 0) return s + text(P(e.x, e.y + 16), label, 'tm');
+  return s + `<text class="tm" x="${f(e.x + 6 * side)}" y="${f(e.y)}" text-anchor="${side > 0 ? 'start' : 'end'}" dominant-baseline="central">${label}</text>`;
+}
+// Punkt in cm-Koordinaten auf dem Strahl unter dem Winkel th im Abstand r vom Nullpunkt
+const cp = (th, r) => [r * Math.cos(rad(th)), r * Math.sin(rad(th))];
 function geoFig() {
   const hi = {}; GP.forEach(k => { hi[k] = vis(k); });
   const Q = (x, y) => P(GV.x + x * GU, GV.y - y * GU);
   let s = geoTri(GV, GU, { hi });
-  if (hi.kante) s += seg(Q(-8, 0), Q(8, 0), 'hi') + text(Q(4.5, -0.9), 'Zeichenkante', 'tm');
-  if (hi.null) s += circ(GV, 16, 'hi') + text(Q(0, -0.9), 'Nullpunkt', 'tm');
-  if (hi.cm) s += text(Q(-4.5, -0.9), 'Längenskala', 'tm');
-  if (hi.aussen) s += text(Q(6.1, 4.4), 'äußere Skala', 'tm');
-  if (hi.innen) s += text(Q(-6.1, 4.4), 'innere Skala', 'tm');
-  if (hi.mitte) s += text(Q(2.9, 7.4), 'Mittellinie', 'tm');
-  if (hi.hilfs) s += text(Q(-4.6, 6.7), 'Hilfslinien', 'tm');
+  if (hi.kante) s += seg(Q(-8, 0), Q(8, 0), 'hi') + callout(Q, [[4.5, 0], [4.5, -0.55]], 'Zeichenkante', 0);
+  if (hi.null) s += circ(GV, 16, 'hi') + callout(Q, [[0, -0.4], [0, -0.55]], 'Nullpunkt', 0);
+  if (hi.cm) s += callout(Q, [[-4.5, 0.2], [-4.5, -0.55]], 'Längenskala', 0);
+  // Hinweislinien laufen genau zwischen zwei Zahlen hindurch (5° neben einem Zehner).
+  if (hi.aussen) { const e = cp(35, 6.4); s += callout(Q, [cp(35, GRo - 0.72), e, [e[0] + 0.3, e[1]]], 'äußere Skala', 1); }
+  if (hi.innen) { const e = cp(145, 6.4); s += callout(Q, [cp(145, GRo - 1.25), e, [e[0] - 0.3, e[1]]], 'innere Skala', -1); }
+  if (hi.mitte) { const e = cp(85, 7.7); s += callout(Q, [[0, 2.75], [2.75 / Math.tan(rad(85)), 2.75], e, [e[0] + 0.3, e[1]]], 'Mittellinie', 1); }
+  if (hi.hilfs) { const t = 2.5 / Math.sin(rad(105)), e = cp(105, 7.7); s += callout(Q, [cp(105, t), e, [e[0] - 0.3, e[1]]], 'Hilfslinien', -1); }
   return s;
 }
 function geoHit(p) {
