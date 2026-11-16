@@ -69,6 +69,10 @@ svg .tm{fill:var(--fg);font:700 24px system-ui,sans-serif}
 svg .tn{fill:var(--fg);font:600 20px system-ui,sans-serif}
 svg .arc{stroke:var(--c1);stroke-width:4;fill:none}
 svg .harc{stroke:var(--c3);stroke-width:8;stroke-linecap:round;fill:none}
+svg .gh{stroke:var(--c1);stroke-width:1.4;opacity:.45}
+svg .ghh{stroke:var(--c3);stroke-width:3}
+svg .tkc{fill:var(--c1);font:600 13px system-ui,sans-serif;opacity:.85}
+svg .tkh{fill:var(--c3);font:800 16px system-ui,sans-serif}
 </style>
 </head>
 <body>
@@ -140,44 +144,60 @@ function arc(c, a1, a2, r, cls = 'arc') {
   const d = ((a2 - a1) % 360 + 360) % 360, p1 = pol(r, a1, c), p2 = pol(r, a1 + d, c);
   return `<path class="${cls}" d="M${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 ${d > 180 ? 1 : 0} 0 ${f(p2.x)} ${f(p2.y)}"/>`;
 }
-// Geodreieck als Halbkreis: Mittelpunkt c, 0-Linie in Richtung base. Außen zählt die Skala ab base, innen von der Gegenseite.
-// o.at: Richtung (0 bis 180 ab base), an der beide Zahlen hervorgehoben werden. o.good: 'out' oder 'in' ist richtig.
-function geo(c, base, r, o = {}) {
-  const a = pol(r, base, c), b = pol(r, base + 180, c);
-  let s = `<path class="geo" d="M${f(a.x)} ${f(a.y)}A${r} ${r} 0 0 0 ${f(b.x)} ${f(b.y)}Z"/>` + arc(c, base, base + 180, r, 'geoL') + seg(a, b, 'geoL');
-  const every = r >= 200 ? 10 : 30;
-  for (let k = 0; k <= 180; k += 5) {
-    const w = base + k;
-    s += seg(pol(r, w, c), pol(r - (k % 10 ? 8 : 15), w, c), 'tick');
-    if (k % every === 0 && o.at !== k) s += text(pol(r - 30, w, c), k, 'tk') + text(pol(r - 54, w, c), 180 - k, 'tki');
+// Ganzes Geodreieck: gleichschenklig-rechtwinklig, lange Seite 16 cm, Nullpunkt c in ihrer Mitte, Spitze oben.
+// u: Bildpunkte pro cm. Winkelzahlen 10 bis 170, 0 und 180 stehen auf dem Geodreieck nicht.
+// o.at: diese Zahl hervorheben, o.good: 'out' oder 'in' ist die richtige Skala. o.hi: Teile farbig hervorheben.
+const gR = (th, d) => (8 - d * Math.SQRT2) / (Math.abs(Math.cos(rad(th))) + Math.sin(rad(th)));
+function geoTri(c, u, o = {}) {
+  const Q = (x, y) => P(c.x + x * u, c.y - y * u), A = (th, d) => pol(gR(th, d) * u, th, c), hi = o.hi || {};
+  let s = poly([Q(-8, 0), Q(8, 0), Q(0, 8)], 'geo') + poly([Q(-8, 0), Q(8, 0), Q(0, 8)], 'geoL');
+  for (let h = 1; h <= 5; h += 0.5) { const w = 4.9 - h; if (w > 0.3) s += seg(Q(-w, h), Q(w, h), hi.hilfs ? 'ghh' : 'gh'); }
+  s += seg(Q(0, 0.85), Q(0, 6), hi.mitte ? 'ghh' : 'gh');
+  for (let i = -70; i <= 70; i++) s += seg(Q(i / 10, 0), Q(i / 10, i % 10 ? (i % 5 ? 0.14 : 0.24) : 0.34), 'tick');
+  for (let i = -7; i <= 7; i++) s += text(Q(i, 0.55), Math.abs(i), hi.cm ? 'tkh' : 'tkc');
+  for (let th = 6; th <= 174; th++) s += seg(A(th, 0.08), A(th, 0.08 + (th % 10 ? (th % 5 ? 0.14 : 0.24) : 0.4)), 'tick');
+  for (let k = 10; k <= 170; k += 10) {
+    if (o.at === k) continue;
+    s += text(A(k, 0.75), k, hi.aussen ? 'tkh' : 'tk');
+    if (k !== 90) s += text(A(k, 1.27), 180 - k, hi.innen ? 'tkh' : 'tki');
   }
-  s += seg(pol(26, base + 90, c), c, 'geoL') + circ(c, 5, 'geoL');
   if (o.at !== undefined) {
-    const w = base + o.at;
-    s += text(pol(r - 30, w, c), o.at, o.good === 'in' ? 'tkr' : o.good ? 'tkb' : 'tm') + text(pol(r - 58, w, c), 180 - o.at, o.good === 'in' ? 'tkb' : o.good ? 'tkr' : 'tm');
+    const k = o.at, gi = o.good === 'in';
+    s += text(A(k, 0.72), k, gi ? 'tkr' : 'tkb') + text(A(k, 1.4), 180 - k, gi ? 'tkb' : 'tkr');
   }
-  return s;
+  return s + circ(c, 5, 'geoL');
 }
 
 // ---------- Das Geodreieck ----------
 // Teile einzeln antippen: Nullpunkt, Zeichenkante, äußere Skala, innere Skala.
-const GV = P(400, 430), GR = 290;
+const GV = P(400, 440), GU = 41;
+const GP = ['null', 'kante', 'cm', 'aussen', 'innen', 'mitte', 'hilfs'];
 function geoFig() {
-  let s = geo(GV, 0, GR);
-  if (vis('kante')) s += seg(pol(GR, 180, GV), pol(GR, 0, GV), 'hi') + text(P(GV.x + 185, GV.y + 40), 'Zeichenkante', 'tm');
-  if (vis('null')) s += circ(GV, 16, 'hi') + text(P(GV.x - 10, GV.y + 40), 'Nullpunkt', 'tm');
-  if (vis('aussen')) s += arc(GV, 3, 47, GR + 14, 'harc') + text(pol(GR + 58, 56, GV), 'äußere Skala', 'tm');
-  if (vis('innen')) s += arc(GV, 133, 177, GR - 78, 'harc') + text(pol(130, 140, GV), 'innere Skala', 'tm');
+  const hi = {}; GP.forEach(k => { hi[k] = vis(k); });
+  const Q = (x, y) => P(GV.x + x * GU, GV.y - y * GU);
+  let s = geoTri(GV, GU, { hi });
+  if (hi.kante) s += seg(Q(-8, 0), Q(8, 0), 'hi') + text(Q(4.5, -0.9), 'Zeichenkante', 'tm');
+  if (hi.null) s += circ(GV, 16, 'hi') + text(Q(0, -0.9), 'Nullpunkt', 'tm');
+  if (hi.cm) s += text(Q(-4.5, -0.9), 'Längenskala', 'tm');
+  if (hi.aussen) s += text(Q(6.1, 4.4), 'äußere Skala', 'tm');
+  if (hi.innen) s += text(Q(-6.1, 4.4), 'innere Skala', 'tm');
+  if (hi.mitte) s += text(Q(2.9, 7.4), 'Mittellinie', 'tm');
+  if (hi.hilfs) s += text(Q(-4.6, 6.7), 'Hilfslinien', 'tm');
   return s;
 }
 function geoHit(p) {
-  const r = dist(p, GV);
-  if (r < 40) return 'null';
-  if (Math.abs(p.y - GV.y) < 26 && Math.abs(p.x - GV.x) <= GR + 10) return 'kante';
-  if (p.y > GV.y) return null;
-  if (r >= GR - 42 && r < GR + 45) return 'aussen';
-  if (r >= GR - 110 && r < GR - 42) return 'innen';
-  return null;
+  const x = (p.x - GV.x) / GU, y = (GV.y - p.y) / GU, ax = Math.abs(x);
+  if (Math.hypot(x, y) < 0.7) return 'null';
+  if (Math.abs(y) < 0.12 && ax <= 8.2) return 'kante';
+  if (y < 0 && y > -1.4 && ax <= 8.2) return x >= 0 ? 'kante' : 'cm';
+  if (y > 0 && y < 0.85 && ax < 7.6) return 'cm';
+  if (y <= 0) return null;
+  if (ax < 0.35 && y < 6.2) return 'mitte';
+  const d = (8 - ax - y) / Math.SQRT2;
+  if (d < -3.5) return null;
+  if (d < 1.0) return d < 0 && x < 0 ? 'innen' : 'aussen';
+  if (d < 1.6) return 'innen';
+  return y <= 5.2 ? 'hilfs' : null;
 }
 
 // ---------- Winkel Schritt für Schritt zeichnen ----------
@@ -187,9 +207,9 @@ let zs = 1;
 function drawFig(a, d0) {
   const d1 = d0 === 0 ? a : 180 - a, lo = Math.min(d0, d1), hi = Math.max(d0, d1);
   let s = ray(ZV, d0, 330) + dot(ZV, 7) + text(P(ZV.x, ZV.y + 32), 'S', 'tx');
-  if (zs === 2 || zs === 3) s += geo(ZV, 0, 250, zs === 3 ? { at: d1, good: d0 === 0 ? 'out' : 'in' } : {});
-  if (zs === 3) s += dot(pol(262, d1, ZV), 8, 'mk');
-  if (zs >= 4) s += ray(ZV, d1, 330) + dot(pol(262, d1, ZV), 6, 'mk');
+  if (zs === 2 || zs === 3) s += geoTri(ZV, 41, zs === 3 ? { at: d1, good: d0 === 0 ? 'out' : 'in' } : {});
+  if (zs === 3) s += dot(pol(gR(d1, -0.3) * 41, d1, ZV), 8, 'mk');
+  if (zs >= 4) s += ray(ZV, d1, 330) + dot(pol(gR(d1, -0.3) * 41, d1, ZV), 6, 'mk');
   if (zs === 5) s += wedge(ZV, lo, hi, 60, 'c1', `α = ${a}°`, 'tx', 160) + arc(ZV, lo, hi, 60);
   return s;
 }
@@ -227,7 +247,7 @@ const RT = ['', 'Rechne: 360° − 300° = 60°.', 'Zeichne 60° wie gewohnt.', 
 
 // ---------- Folien ----------
 const STEPS = [
-  { t: 'Das Geodreieck', rv: 1, parts: ['null', 'kante', 'aussen', 'innen'], hit: geoHit, fig: geoFig,
+  { t: 'Das Geodreieck', rv: 1, parts: GP, hit: geoHit, fig: geoFig,
     txt: () => done() ? 'Die äußere Skala beginnt rechts bei 0°, die innere links. Lies immer die Skala, die an deinem ersten Schenkel bei 0° beginnt.' : 'Wie heißen die Teile des Geodreiecks?' },
   { t: 'Spitzen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(40, 0), txt: () => `Schritt ${zs}: ${drawTxt(40, 0)}`, eq: () => 'α = 40°', btns: stepBtn(5) },
   { t: 'Stumpfen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(130, 180), txt: () => `Schritt ${zs}: ${drawTxt(130, 180)}`, eq: () => 'α = 130°', btns: stepBtn(5) },
