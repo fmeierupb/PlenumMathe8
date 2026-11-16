@@ -233,24 +233,26 @@ const drawTxt = (a, d0) => ['',
 const stepBtn = n => [{ l: 'Nächster Schritt', f: () => { zs = Math.min(n, zs + 1); }, dis: () => zs === n }];
 
 // ---------- Welche Skala? ----------
-// Aufgabe 40°. A hat richtig gezeichnet, B hat die falsche Skala genommen und 140° gezeichnet.
-const KA = P(170, 380), KB = P(600, 380);
+// Beide Aufgaben der Stunde, je eine richtige Zeichnung und eine mit der falschen Skala.
+// [Scheitel, gezeichneter Winkel, Aufgabe, richtig?]
+const KC = [[P(170, 185), 40, 40, true], [P(560, 185), 140, 40, false], [P(170, 440), 50, 130, false], [P(560, 440), 130, 130, true]];
+const KK = ['a', 'b', 'c', 'd'];
 function checkFig() {
-  let s = '';
-  [[KA, 40, 'A'], [KB, 140, 'B']].forEach(([V, w, n]) => {
-    s += wedge(V, 0, w, 52, 'c1') + ray(V, 0, 190) + ray(V, w, 180) + dot(V, 7) + text(P(V.x + 95, 110), n, 'tx');
+  let s = text(P(400, 40), 'Aufgabe: α = 40°', 'tm') + text(P(400, 295), 'Aufgabe: α = 130°', 'tm');
+  KC.forEach(([V, w, , ok], i) => {
+    s += wedge(V, 0, w, 40, 'c1') + arc(V, 0, w, 40) + ray(V, 0, 150) + ray(V, w, 125) + dot(V, 6);
+    const cx = V.x + (w > 90 ? 40 : 75);
+    if (vis(KK[i])) s += text(P(cx, V.y + 38), ok ? `${w}°, ${w < 90 ? 'spitz' : 'stumpf'}: richtig` : `${w}°, ${w < 90 ? 'spitz' : 'stumpf'}: falsche Skala`, ok ? 'tkb' : 'tkr');
   });
-  if (vis('a')) s += text(P(KA.x + 95, 450), '40°, spitz: richtig', 'tkb');
-  if (vis('b')) s += text(P(KB.x + 20, 450), '140°, stumpf: falsche Skala', 'tkr');
   return s;
 }
-const checkHit = p => p.y > 80 && p.y < 490 ? (p.x < 400 ? 'a' : 'b') : null;
+const checkHit = p => p.y > 70 && p.y < 500 ? KK[(p.x < 400 ? 0 : 1) + (p.y < 265 ? 0 : 2)] : null;
 
 // ---------- Überstumpfer Winkel ----------
 const UV = P(400, 290);
 function reflexFig() {
   let s = ray(UV, 0, 300) + dot(UV, 7) + text(P(UV.x - 4, UV.y + 32), 'S', 'tx');
-  if (zs >= 2) s += wedge(UV, 0, 60, 60, 'n', '60°', 'tx') + ray(UV, 60, 220);
+  if (zs >= 2) s += wedge(UV, 0, 60, 50, 'n', '60°', 'tx') + arc(UV, 0, 60, 50) + ray(UV, 60, 220);
   if (zs === 3) s += wedge(UV, 60, 360, 75, 'c1') + arc(UV, 60, 360, 75) + text(pol(150, 220, UV), 'α = 300°', 'tx');
   return s;
 }
@@ -262,9 +264,9 @@ const STEPS = [
     txt: () => done() ? 'Die äußere Skala beginnt rechts bei 0°, die innere links. Lies immer die Skala, die an deinem ersten Schenkel bei 0° beginnt.' : 'Wie heißen die Teile des Geodreiecks?' },
   { t: 'Spitzen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(40, 0), txt: () => `Schritt ${zs}: ${drawTxt(40, 0)}`, eq: () => 'α = 40°', btns: stepBtn(5) },
   { t: 'Stumpfen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(130, 180), txt: () => `Schritt ${zs}: ${drawTxt(130, 180)}`, eq: () => 'α = 130°', btns: stepBtn(5) },
-  { t: 'Welche Skala?', rv: 1, parts: ['a', 'b'], hit: checkHit, fig: checkFig,
-    txt: () => done() ? '40° ist spitz. Sieht dein Winkel stumpf aus, hast du die falsche Skala genommen.' : 'Die Aufgabe war: Zeichne α = 40°. Wer hat richtig gezeichnet?',
-    eq: () => vis('b') ? '180° − 40° = 140°' : '' },
+  { t: 'Welche Skala?', rv: 1, parts: KK, hit: checkHit, fig: checkFig,
+    txt: () => done() ? 'Ein spitzer Winkel muss spitz aussehen, ein stumpfer stumpf. Sonst war es die falsche Skala.' : 'Zu jeder Aufgabe gibt es zwei Zeichnungen. Welche stimmt?',
+    eq: () => [vis('b') && '180° − 40° = 140°', vis('c') && '180° − 130° = 50°'].filter(Boolean).join(' &nbsp;&nbsp; ') },
   { t: 'Überstumpfen Winkel zeichnen', enter: () => { zs = 1; }, fig: reflexFig, txt: () => `Schritt ${zs}: ${RT[zs]}`,
     eq: () => zs === 1 ? '360° − 300° = 60°' : 'α = 300°', btns: stepBtn(3) }
 ];
