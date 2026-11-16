@@ -1,5 +1,5 @@
 // Eigener Cache-Präfix, damit andere Werkzeuge unter derselben Adresse unberührt bleiben.
-const CACHE = 'plenum-9e181399';
+const CACHE = 'plenum-9e752444';
 // Alles, was beim ersten Aufruf in den Speicher kommt.
 const FILES = [
   './',
@@ -18,6 +18,7 @@ const FILES = [
   './ab/ab-winkel-geradenkreuzungen.svg',
   './ab/ab-winkelsumme.pdf',
   './ab/ab-winkelsumme.svg',
+  './ab/kaestchen.svg',
   './dreiecke-konstruieren.html',
   './einfuehrung-winkel-kreuzungen.html',
   './icon-180.png',
