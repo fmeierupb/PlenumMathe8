@@ -217,8 +217,8 @@ const STEPS = [
     eq: () => shown ? `<div>α + β = 180° &nbsp;&nbsp;| − α</div><div>β = 180° − α</div><div>β = 180° − ${a}° = ${180 - a}°</div>` : '' },
   { t: 'An der Kreuzung gibt es vier Paare von Nebenwinkeln', drag: cross, btns: [{ l: 'Anderes Paar', f: () => { pair++; } }],
     fig: () => draw({ names: 1, vals: 1, hi: NP[pair % 4] }),
-    // Dieselbe Rechnung wie auf der Folie Nebenwinkel, für das gerade gezeigte Paar und live beim Drehen
-    eq: () => { const [x, y] = NP[pair % 4]; return `<div>${GR[x]} + ${GR[y]} = 180° &nbsp;&nbsp;| − ${GR[x]}</div><div>${GR[y]} = 180° − ${GR[x]}</div><div>${GR[y]} = 180° − ${val(x)}° = ${val(y)}°</div>`; } },
+    // Endformel wie auf der Folie Nebenwinkel, für das gerade gezeigte Paar und live beim Drehen
+    eq: () => { const [x, y] = NP[pair % 4]; return `${GR[y]} = 180° − ${val(x)}° = ${val(y)}°`; } },
   // Die Antwort
   { t: 'Zurück zur Fußleiste', c: JR, enter: () => { wood(); rev = false; }, drag: cut, btns: [{ l: 'Auflösen', f: () => { rev = !rev; } }],
     fig: () => boardFig(rev), txt: () => rev ? 'Schnittwinkel und Winkel am Reststück sind Nebenwinkel.' : cutTxt(), eq: () => rev ? `180° − ${a}° = ${180 - a}°` : '' },
