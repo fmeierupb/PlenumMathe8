@@ -181,7 +181,7 @@ function wsw(k) {
   if (k >= 4) s += seg(A0, VC) + seg(B0, VC) + cMark(VC);
   return s + base();
 }
-const con = (t, fn, L) => k => ({ t, fig: () => fn(k), eq: () => lines(L, k) });
+const con = (t, fn, L) => k => ({ t, grp: t, fig: () => fn(k), eq: () => lines(L, k) });
 const sssS = con('SSS: drei Seiten', sss, SSS), swsS = con('SWS: zwei Seiten und der Winkel dazwischen', sws, SWS), wswS = con('WSW: eine Seite und die beiden Winkel daran', wsw, WSW);
 
 // ---------- Aufgabe ----------
@@ -253,13 +253,17 @@ function put(st, o = {}) {
 // Überschrift, Text und Rechnung bekommen gleich beim Betreten der Folie den Platz ihres vollsten Zustands.
 // So bleibt die Zeichnung gleich groß, wenn unten Schritte dazukommen. st.each(m) misst weitere Zustände.
 const BOX = ['title', 'txt', 'eq'];
+// Folien mit gleichem grp (eine Herleitung über mehrere Folien) teilen sich den Platz des längsten Stands.
 function reserve(st) {
   const keep = [shown, sub], hi = BOX.map(() => 0);
   BOX.forEach(id => { $(id).style.minHeight = ''; });
-  const m = o => { put(st, o); BOX.forEach((id, i) => { hi[i] = Math.max(hi[i], $(id).offsetHeight); }); };
-  for (let i = 0; i <= (st.rv || 0); i++) { shown = i > 0; sub = i; m(); }
-  [shown, sub] = keep; m();
-  if (st.each) st.each(m);
+  const m = (o, g = st) => { put(g, o); BOX.forEach((id, i) => { hi[i] = Math.max(hi[i], $(id).offsetHeight); }); };
+  for (const g of st.grp ? STEPS.filter(s => s.grp === st.grp) : [st]) {
+    for (let i = 0; i <= (g.rv || 0); i++) { shown = i > 0; sub = i; m(undefined, g); }
+    [shown, sub] = keep;
+    if (g.each) g.each(o => m(o, g));
+  }
+  m();
   BOX.forEach((id, i) => { $(id).style.minHeight = hi[i] + 'px'; });
 }
 // Was trotzdem größer wird, behält seinen Platz bis zur nächsten Folie.

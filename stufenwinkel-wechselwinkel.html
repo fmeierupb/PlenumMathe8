@@ -182,9 +182,11 @@ function shiftDrag(w, p) {
 }
 const WS = `${kg('c1', 'α₂')} = ${kg('c1', 'α₁')} &nbsp;&nbsp; verschoben, g ∥ h`;
 const whyS = n => ({
+  grp: 'whyS',
   t: 'Warum sind Stufenwinkel gleich groß?', fig: () => stufFig(n),
   eq: () => n === 2 || off === 1 ? WS : '',
   enter: () => { off = n === 1 ? 0.4 : 1; }, drag: n === 1 ? shiftDrag : rot,
+  each: m => { const o = off; off = 0.4; m(); off = 1; m(); off = o; },
   txt: n === 1 ? () => off === 1 ? 'g und h sind parallel. Deshalb liegt die verschobene Gerade g genau auf h.' : 'Schieb g an f entlang nach unten. Beim Verschieben ändert sich der Winkel nicht.'
     : 'Stufenwinkel an parallelen Geraden sind gleich groß.'
 });
@@ -226,6 +228,7 @@ function newPq(first) {
 const WP = [[0, 0, 1, 2], [0, 1, 1, 3], [0, 2, 1, 0], [0, 3, 1, 1]];
 const WW = [`${kg('c1', 'α₁')} = ${kg('c1', 'α₂')} &nbsp;&nbsp; Stufenwinkel`, `${kg('c1', 'α₂')} = ${kg('c3', 'γ₂')} &nbsp;&nbsp; Scheitelwinkel`, `Also: ${kg('c1', 'α₁')} = ${kg('c3', 'γ₂')}`];
 const whyW = n => ({
+  grp: 'whyW',
   t: 'Warum sind Wechselwinkel gleich groß?', drag: rot,
   fig: () => { const c = [{ '0,0': 'c1', '1,0': 'c1' }, { '1,0': 'c1', '1,2': 'c3' }, { '0,0': 'c1', '1,2': 'c3' }][n - 1]; return par({ col: c, names: 1, vals: 1, only: Object.keys(c) }); },
   eq: () => lines(WW, n)
@@ -287,13 +290,17 @@ function put(st, o = {}) {
 // Überschrift, Text und Rechnung bekommen gleich beim Betreten der Folie den Platz ihres vollsten Zustands.
 // So bleibt die Zeichnung gleich groß, wenn unten Schritte dazukommen. st.each(m) misst weitere Zustände.
 const BOX = ['title', 'txt', 'eq'];
+// Folien mit gleichem grp (eine Herleitung über mehrere Folien) teilen sich den Platz des längsten Stands.
 function reserve(st) {
   const keep = [shown, sub], hi = BOX.map(() => 0);
   BOX.forEach(id => { $(id).style.minHeight = ''; });
-  const m = o => { put(st, o); BOX.forEach((id, i) => { hi[i] = Math.max(hi[i], $(id).offsetHeight); }); };
-  for (let i = 0; i <= (st.rv || 0); i++) { shown = i > 0; sub = i; m(); }
-  [shown, sub] = keep; m();
-  if (st.each) st.each(m);
+  const m = (o, g = st) => { put(g, o); BOX.forEach((id, i) => { hi[i] = Math.max(hi[i], $(id).offsetHeight); }); };
+  for (const g of st.grp ? STEPS.filter(s => s.grp === st.grp) : [st]) {
+    for (let i = 0; i <= (g.rv || 0); i++) { shown = i > 0; sub = i; m(undefined, g); }
+    [shown, sub] = keep;
+    if (g.each) g.each(o => m(o, g));
+  }
+  m();
   BOX.forEach((id, i) => { $(id).style.minHeight = hi[i] + 'px'; });
 }
 // Was trotzdem größer wird, behält seinen Platz bis zur nächsten Folie.
