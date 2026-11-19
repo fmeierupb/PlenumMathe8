@@ -154,16 +154,26 @@ function fullFig() {
   return s;
 }
 // Folie 2 in Schritten: Jeder ungerade Druck zeigt den nächsten Winkel, jeder gerade nennt seine Art.
-// Bei 270° fragt der elfte Druck nach dem vollen Kreis, der zwölfte zeigt 360°.
+// Bei 270° fragt der elfte Druck nach dem vollen Kreis, der zwölfte zeigt 360°. Danach lässt sich der Winkel frei drehen.
 const KA = [[30, 'spitzer Winkel'], [90, 'rechter Winkel'], [120, 'stumpfer Winkel'], [180, 'gestreckter Winkel'], [270, 'überstumpfer Winkel']];
 const ks = () => shown ? sub : 0;
-const kAng = () => { const k = ks(); return k === 0 ? 0 : k >= 12 ? 360 : KA[Math.min(4, (k - 1) >> 1)][0]; };
+let tf = 360;
+const kAng = () => { const k = ks(); return k === 0 ? 0 : k >= 12 ? tf : KA[Math.min(4, (k - 1) >> 1)][0]; };
+const kindOf = x => x === 0 ? 'Nullwinkel' : x < 90 ? 'spitzer Winkel' : x === 90 ? 'rechter Winkel' : x < 180 ? 'stumpfer Winkel' : x === 180 ? 'gestreckter Winkel' : x < 360 ? 'überstumpfer Winkel' : 'Vollwinkel';
+function turnDrag(w) {
+  if (ks() < 12) return;
+  let n = Math.round(w);
+  if (tf >= 270 && n < 90) n = 360; else if (tf <= 90 && n > 270) n = 0;
+  for (const q of [0, 90, 180, 270, 360]) if (Math.abs(n - q) <= 3) n = q;
+  tf = n;
+}
 function kindFig() {
   const k = ks(); t = kAng();
-  return fullFig() + (k >= 2 && k <= 10 && k % 2 === 0 ? text({ x: M.x, y: 492 }, KA[k / 2 - 1][1], 'tx tc1') : '');
+  const lab = k >= 12 ? kindOf(tf) : k >= 2 && k <= 10 && k % 2 === 0 ? KA[k / 2 - 1][1] : '';
+  return fullFig() + (lab ? text({ x: M.x, y: 492 }, lab, 'tx tc1') : '');
 }
 const kindTxt = () => { const k = ks(); return k === 11 ? 'Wie viel Grad sind es, wenn wir den Kreis voll machen?' : k % 2 && k < 11 ? 'Welche Winkelart ist das?' : ''; };
-const kindT = () => { const k = ks(); return k === 12 ? 'Ein voller Kreis hat 360°' : k >= 1 && k <= 10 ? 'Winkelarten' : 'Ein voller Kreis'; };
+const kindT = () => { const k = ks(); return k === 12 ? 'Ein voller Kreis hat 360°' : k <= 10 ? 'Winkelarten' : 'Ein voller Kreis'; };
 // Folie 3 in Schritten: Halbkreis wie beim Drehen, dann die zweite Hälfte, dann wird aus den Schenkeln die Gerade, dann die Rechnung.
 function lineFig() {
   if (!shown) { const x = t; t = 180; const s = fullFig(); t = x; return s; }
@@ -229,7 +239,7 @@ const STEPS = [
   // Die Frage
   { t: 'Eine Fußleiste wird schräg abgesägt', c: JR, enter: wood, drag: cut, fig: () => boardFig(false), txt: cutTxt },
   // Vom Kreis zur Geraden
-  { t: kindT, rv: 12, fig: kindFig, txt: kindTxt },
+  { t: kindT, rv: 12, enter: () => { tf = 360; }, drag: turnDrag, fig: kindFig, txt: kindTxt },
   { t: () => LT[shown ? sub : 0], rv: 3, fig: lineFig, eq: () => shown && sub >= 3 ? '360° : 2 = 180°' : '' },
   // Zweite Gerade: Nebenwinkel
   { t: 'Zwei Geraden kreuzen sich', enter: wood, drag: cross, fig: () => draw({}) },
