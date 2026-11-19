@@ -22,6 +22,7 @@ h1{margin:0;font-size:clamp(26px,4.2vw,52px);line-height:1.15;min-height:1.2em}
 #txt{font-size:clamp(18px,2.6vw,32px);min-height:1.4em;text-align:center}
 #eq{font-size:clamp(22px,3.6vw,44px);font-weight:700;min-height:1.4em;text-align:center;font-variant-numeric:tabular-nums;line-height:1.35}
 #eq .dim{opacity:.4;font-size:.8em}
+#eq .k.c1{color:var(--c1)}#eq .k.c2{color:var(--c2)}#eq .k.c3{color:var(--c3)}#eq .k.cr{color:#d81e1e}#eq .k.n{color:var(--mut)}
 footer{display:flex;gap:10px;align-items:center;margin-top:10px}
 #extras{display:flex;gap:10px;margin:0 auto}
 button{font:inherit;font-size:clamp(16px,2vw,24px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;cursor:pointer;touch-action:manipulation}
@@ -87,6 +88,8 @@ const dirOf = (c, p) => (deg(Math.atan2(-(p.y - c.y), p.x - c.x)) + 360) % 360;
 const f = n => n.toFixed(1);
 const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = a => a[rnd(0, a.length - 1)];
+// Gradzahl in der Farbe ihres Winkelbogens (Klasse wie beim wedge)
+const kz = (c, v) => `<span class="k ${c}">${v}°</span>`;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const lines = (arr, n = arr.length) => arr.slice(0, n).map((l, i) => `<div class="${i < n - 1 ? 'dim' : ''}">${l}</div>`).join('');
 const text = (p, s, c = 'tx') => `<text class="${c}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="middle" dominant-baseline="central">${s}</text>`;
@@ -248,7 +251,7 @@ function taskEq(t, sum) {
   const k = t.v.length, u = GR[t.u], o = [...Array(k).keys()].filter(i => i !== t.u);
   return rows([`${GR.slice(0, k).join(' + ')} = ${sum}° &nbsp;&nbsp;| ${o.map(i => '− ' + GR[i]).join(' ')}`,
     `${u} = ${sum}° ${o.map(i => '− ' + GR[i]).join(' ')}`,
-    `${u} = ${sum}° ${o.map(i => '− ' + t.v[i] + '°').join(' ')} = ${t.v[t.u]}°`]);
+    `${u} = ${sum}° ${o.map(i => '− ' + kz(CL[i], t.v[i])).join(' ')} = ${kz(CL[t.u], t.v[t.u])}`]);
 }
 
 const TD = { down: triDown, drag: triDrag };
@@ -259,7 +262,7 @@ const STEPS = [
   { t: 'Ein Dreieck hat drei Innenwinkel', ...TD, fig: () => triFig() },
   { t: 'Was fällt auf?', rv: 1, ...TD, fig: () => triFig({ vals: 1 }),
     txt: () => shown ? 'Im Dreieck sind alle drei Winkel zusammen 180°.' : '',
-    eq: () => { const [a, b, c] = tAng(); return shown ? `${a}° + ${b}° + ${c}° = 180°` : ''; } },
+    eq: () => { const [a, b, c] = tAng(); return shown ? `${kz('c1', a)} + ${kz('c2', b)} + ${kz('c3', c)} = 180°` : ''; } },
   { t: 'Warum? Eine Parallele zur Grundseite durch die Spitze', ...TD, fig: () => triFig({ vals: 1, par: 1 }) },
   { t: 'α taucht oben wieder auf', ...TD, fig: () => triFig({ vals: 1, par: 1, cA: 1 }), txt: 'α und das obere α sind Wechselwinkel an den Parallelen.' },
   { t: 'β auch', ...TD, fig: () => triFig({ vals: 1, par: 1, cA: 1, cB: 1 }), txt: 'Auch β ist ein Wechselwinkel.' },
@@ -269,11 +272,11 @@ const STEPS = [
   { t: 'Zurück zum Dach', rv: 1, enter: () => { n = 35; },
     btns: [{ l: '− 5°', f: () => setN(n - 5) }, { l: '+ 5°', f: () => setN(n + 5) }],
     fig: () => roofFig(shown),
-    eq: () => shown ? rows(['α + β + γ = 180° &nbsp;&nbsp;| − α − β', 'γ = 180° − α − β', `γ = 180° − ${n}° − ${n}° = ${180 - 2 * n}°`]) : '' },
+    eq: () => shown ? rows(['α + β + γ = 180° &nbsp;&nbsp;| − α − β', 'γ = 180° − α − β', `γ = 180° − ${kz('c1', n)} − ${kz('c2', n)} = ${kz('c3', 180 - 2 * n)}`]) : '' },
   // Viereck
   { t: 'Ein Viereck hat vier Innenwinkel', rv: 1, down: quadDown, drag: quadDrag, fig: () => quadFig({ vals: 1 }),
     txt: () => shown ? 'Im Viereck sind alle vier Winkel zusammen 360°.' : 'Was fällt auf?',
-    eq: () => shown ? qAng().map(x => x + '°').join(' + ') + ' = 360°' : '' },
+    eq: () => shown ? qAng().map((x, i) => kz(CL[i], x)).join(' + ') + ' = 360°' : '' },
   { t: 'Warum 360°?', down: quadDown, drag: quadDrag, fig: () => quadFig({ vals: 1, split: 1 }),
     txt: 'Die Diagonale teilt das Viereck in zwei Dreiecke.', eq: () => '2 · 180° = 360°' },
   // Aufgaben

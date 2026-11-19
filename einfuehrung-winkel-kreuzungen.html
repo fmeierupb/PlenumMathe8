@@ -24,6 +24,7 @@ h1{margin:0;font-size:clamp(26px,4.2vw,52px);line-height:1.15;min-height:1.2em}
 #eq .dim{opacity:.4;font-size:.8em}
 #eq .k1{color:var(--c1)}
 #eq .k2{color:var(--c2)}
+#eq .kr{color:#d81e1e}
 footer{display:flex;gap:10px;align-items:center;margin-top:10px}
 #extras{display:flex;gap:10px;margin:0 auto}
 button{font:inherit;font-size:clamp(16px,2vw,24px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;cursor:pointer;touch-action:manipulation}
@@ -173,8 +174,8 @@ function draw(o) {
   s += seg(pol(520, 0), pol(520, 180)) + seg(pol(520, a), pol(520, a + 180));
   return s;
 }
-// Zahl in der Farbe ihres Winkelbogens: α und γ blau, β und δ orange
-const kz = (k, v) => `<span class="${k === 'al' || k === 'ga' ? 'k1' : 'k2'}">${v}°</span>`;
+// Zahl in der Farbe ihres Winkelbogens: α und γ blau, β und δ orange, sonst die Klasse direkt (k1, k2, kr)
+const kz = (k, v) => `<span class="${{ al: 'k1', ga: 'k1', be: 'k2', de: 'k2' }[k] || k}">${v}°</span>`;
 const SP = [['al', 'ga'], ['be', 'de']], NP = [['al', 'be'], ['be', 'ga'], ['ga', 'de'], ['de', 'al']];
 const WL = ['α + β = 180°', 'γ + β = 180°', 'α + β = γ + β &nbsp;&nbsp;| − β', 'α = γ'];
 const why = n => ({
@@ -184,7 +185,7 @@ const why = n => ({
 });
 
 // ---------- Aufgaben ----------
-function newQuiz() { let n; do n = rnd(25, 155); while (n === 90 || n === a); a = n; quiz = { given: KEYS[rnd(0, 3)], shown: {} }; }
+function newQuiz() { let n; do n = 2 * rnd(13, 77); while (n === 90 || n === a); a = n; quiz = { given: KEYS[rnd(0, 3)], shown: {} }; }
 function quizFig() { const hidden = {}; KEYS.forEach(k => { hidden[k] = k !== quiz.given && !quiz.shown[k]; }); return draw({ names: 1, vals: 1, color: 1, hidden, fixed: 1 }); }
 function quizTap(w) { const k = w < a ? 'al' : w < 180 ? 'be' : w < 180 + a ? 'ga' : 'de'; if (k !== quiz.given) quiz.shown[k] = !quiz.shown[k]; }
 
@@ -225,12 +226,12 @@ const STEPS = [
     eq: () => { const [x, y] = NP[pair % 4]; return `${GR[y]} = 180° − ${kz(x, val(x))} = ${kz(y, val(y))}`; } },
   // Die Antwort
   { t: 'Zurück zur Fußleiste', c: JR, enter: () => { wood(); rev = false; }, drag: cut, btns: [{ l: 'Auflösen', f: () => { rev = !rev; } }],
-    fig: () => boardFig(rev), txt: () => rev ? 'Schnittwinkel und Winkel am Reststück sind Nebenwinkel.' : cutTxt(), eq: () => rev ? `180° − ${a}° = ${180 - a}°` : '' },
+    fig: () => boardFig(rev), txt: () => rev ? 'Schnittwinkel und Winkel am Reststück sind Nebenwinkel.' : cutTxt(), eq: () => rev ? `180° − ${kz('k1', a)} = ${kz('kr', 180 - a)}` : '' },
   // Scheitelwinkel
   { t: 'Was fällt auf?', drag: cross, fig: () => draw({ names: 1, vals: 1 }) },
   { t: 'Scheitelwinkel', drag: cross, btns: [{ l: 'Anderes Paar', f: () => { pair++; } }], txt: 'Scheitelwinkel liegen sich gegenüber. Sie sind gleich groß.',
     fig: () => draw({ names: 1, vals: 1, hi: SP[pair % 2] }),
-    eq: () => { const p = SP[pair % 2]; return `${GR[p[0]]} = ${GR[p[1]]} = ${val(p[0])}°`; } },
+    eq: () => { const p = SP[pair % 2]; return `${GR[p[0]]} = ${GR[p[1]]} = ${kz(p[0], val(p[0]))}`; } },
   why(1), why(2), why(3), why(4),
   // Aufgaben
   { t: 'Aufgabe: Ein Winkel reicht', enter: newQuiz, tap: quizTap, btns: [{ l: 'Neue Aufgabe', f: newQuiz }], fig: quizFig },
@@ -238,10 +239,10 @@ const STEPS = [
     btns: [{ l: '− 5°', f: () => setBeta(beta - 5) }, { l: '+ 5°', f: () => setBeta(beta + 5) },
       { l: 'Zusammenfügen', f: () => { joined = true; }, dis: () => joined || a + beta !== 180 }],
     fig: stossFig, txt: () => joined ? 'Zusammen 180°. Die Leisten liegen gerade an der Wand.' : a + beta === 180 ? 'Die Schnittflächen passen aufeinander.' : 'Die Schnittflächen passen nicht aufeinander.',
-    eq: () => `${a}° + ${beta}° = ${a + beta}°` },
+    eq: () => `${kz('k1', a)} + ${kz('kr', beta)} = ${a + beta}°` },
   { t: 'Aufgabe: Gerade oder Knick?', enter: () => newKn(true), btns: [{ l: 'Auflösen', f: () => { kn.show = !kn.show; } }, { l: 'Neue Aufgabe', f: newKn }],
     fig: knFig, txt: 'Ist die Linie von A nach B gerade?',
-    eq: () => { if (!kn.show) return ''; const l = 180 - kn.u, r = kn.u + kn.k; return `${l}° + ${r}° = ${l + r}°. ` + (kn.k ? 'Knick!' : 'Gerade!'); } }
+    eq: () => { if (!kn.show) return ''; const l = 180 - kn.u, r = kn.u + kn.k; return `${kz('k2', l)} + ${kz('k1', r)} = ${l + r}°. ` + (kn.k ? 'Knick!' : 'Gerade!'); } }
 ];
 
 let shownStep = -1;
