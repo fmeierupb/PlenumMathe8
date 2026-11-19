@@ -93,6 +93,8 @@ const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = a => a[rnd(0, a.length - 1)];
 // Gradzahl in der Farbe ihres Winkelbogens (Klasse wie beim wedge)
 const kz = (c, v) => `<span class="k ${c}">${v}°</span>`;
+// Winkelname in der Farbe seines Bogens
+const kg = (c, s) => `<span class="k ${c}">${s}</span>`;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const lines = (arr, n = arr.length) => arr.slice(0, n).map((l, i) => `<div class="${i < n - 1 ? 'dim' : ''}">${l}</div>`).join('');
 const text = (p, s, c = 'tx') => `<text class="${c}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="middle" dominant-baseline="central">${s}</text>`;

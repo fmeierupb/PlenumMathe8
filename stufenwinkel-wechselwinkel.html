@@ -92,6 +92,8 @@ const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = a => a[rnd(0, a.length - 1)];
 // Gradzahl in der Farbe ihres Winkelbogens (Klasse wie beim wedge)
 const kz = (c, v) => `<span class="k ${c}">${v}°</span>`;
+// Winkelname in der Farbe seines Bogens
+const kg = (c, s) => `<span class="k ${c}">${s}</span>`;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const lines = (arr, n = arr.length) => arr.slice(0, n).map((l, i) => `<div class="${i < n - 1 ? 'dim' : ''}">${l}</div>`).join('');
 const text = (p, s, c = 'tx') => `<text class="${c}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="middle" dominant-baseline="central">${s}</text>`;
@@ -178,7 +180,7 @@ function shiftDrag(w, p) {
   const t = (p.y - GY) / (HY - GY);
   off = off === 1 ? (t < 0.85 ? clamp(t, 0.25, 1) : 1) : (t >= 0.93 ? 1 : clamp(t, 0.25, 1));
 }
-const WS = 'α₂ = α₁ &nbsp;&nbsp; verschoben, g ∥ h';
+const WS = `${kg('c1', 'α₂')} = ${kg('c1', 'α₁')} &nbsp;&nbsp; verschoben, g ∥ h`;
 const whyS = n => ({
   t: 'Warum sind Stufenwinkel gleich groß?', fig: () => stufFig(n),
   eq: () => n === 2 || off === 1 ? WS : '',
@@ -222,7 +224,7 @@ function newPq(first) {
 }
 
 const WP = [[0, 0, 1, 2], [0, 1, 1, 3], [0, 2, 1, 0], [0, 3, 1, 1]];
-const WW = ['α₁ = α₂ &nbsp;&nbsp; Stufenwinkel', 'α₂ = γ₂ &nbsp;&nbsp; Scheitelwinkel', 'Also: α₁ = γ₂'];
+const WW = [`${kg('c1', 'α₁')} = ${kg('c1', 'α₂')} &nbsp;&nbsp; Stufenwinkel`, `${kg('c1', 'α₂')} = ${kg('c3', 'γ₂')} &nbsp;&nbsp; Scheitelwinkel`, `Also: ${kg('c1', 'α₁')} = ${kg('c3', 'γ₂')}`];
 const whyW = n => ({
   t: 'Warum sind Wechselwinkel gleich groß?', drag: rot,
   fig: () => { const c = [{ '0,0': 'c1', '1,0': 'c1' }, { '1,0': 'c1', '1,2': 'c3' }, { '0,0': 'c1', '1,2': 'c3' }][n - 1]; return par({ col: c, names: 1, vals: 1, only: Object.keys(c) }); },
@@ -239,12 +241,12 @@ const STEPS = [
   { t: 'Stufenwinkel', rv: 1, drag: rot, btns: [{ l: 'Anderes Paar', f: () => { pair++; } }],
     fig: () => { const i = pair % 4, c = {}, h = {}; c[key(0, i)] = 'c1'; c[key(1, i)] = 'c1'; if (!shown) h[key(1, i)] = 1; return par({ col: c, names: 1, vals: 1, only: Object.keys(c), hidden: h }); },
     txt: () => shown ? 'Stufenwinkel liegen an beiden Kreuzungen an der gleichen Stelle. Bei parallelen Geraden sind sie gleich groß.' : '',
-    eq: () => { const i = pair % 4; return shown ? `${nm(0, i)} = ${nm(1, i)} = ${kz('c1', v(0, i))}` : ''; } },
+    eq: () => { const i = pair % 4; return shown ? `${kg('c1', nm(0, i))} = ${kg('c1', nm(1, i))} = ${kz('c1', v(0, i))}` : ''; } },
   whyS(1), whyS(2),
   { t: 'Und wenn g und h nicht parallel sind?', c: () => C()[1], enter: () => { tlt = 8; }, drag: tilt,
     fig: () => par({ col: { '0,0': 'c1', '1,0': 'c1' }, names: 1, vals: 1, only: ['0,0', '1,0'] }),
     txt: () => tlt === 0 ? 'g und h sind parallel. Die Stufenwinkel sind gleich groß.' : 'g und h sind nicht parallel. Die Stufenwinkel sind verschieden groß.',
-    eq: () => `α₁ = ${kz('c1', v(0, 0))} &nbsp;&nbsp; α₂ = ${kz('c1', v(1, 0))}` },
+    eq: () => `${kg('c1', 'α₁')} = ${kz('c1', v(0, 0))} &nbsp;&nbsp; ${kg('c1', 'α₂')} = ${kz('c1', v(1, 0))}` },
   // Die Antwort
   { t: 'Zurück zum Parkplatz', c: K2, enter: () => { b = 50; marked = false; },
     drag: w => { if (w > 180) w = w > 270 ? 0 : 180; setB(Math.round(w / 5) * 5); },
@@ -256,13 +258,13 @@ const STEPS = [
   { t: 'Wechselwinkel', rv: 1, drag: rot, btns: [{ l: 'Anderes Paar', f: () => { pair++; } }],
     fig: () => { const [k1, i1, k2, i2] = WP[pair % 4], c = {}, h = {}; c[key(k1, i1)] = 'c1'; c[key(k2, i2)] = 'c3'; if (!shown) h[key(k2, i2)] = 1; return par({ col: c, names: 1, vals: 1, only: Object.keys(c), hidden: h }); },
     txt: () => shown ? 'Wechselwinkel liegen auf verschiedenen Seiten von f und an verschiedenen Parallelen. Bei parallelen Geraden sind sie gleich groß.' : '',
-    eq: () => { const [k1, i1, k2, i2] = WP[pair % 4]; return shown ? `${nm(k1, i1)} = ${nm(k2, i2)} = ${kz('c1', v(k1, i1))}` : ''; } },
+    eq: () => { const [k1, i1, k2, i2] = WP[pair % 4]; return shown ? `${kg('c1', nm(k1, i1))} = ${kg('c3', nm(k2, i2))} = ${kz('c1', v(k1, i1))}` : ''; } },
   whyW(1), whyW(2), whyW(3),
   // Aufgaben
   { t: 'Aufgabe: Ein Winkel reicht für alle acht', enter: newQ8, tap: q8Tap, btns: [{ l: 'Neue Aufgabe', f: newQ8 }], fig: q8Fig },
   { t: 'Aufgabe: Parallel oder nicht?', enter: () => newPq(true), btns: [{ l: 'Auflösen', f: () => { pq.show = !pq.show; } }, { l: 'Neue Aufgabe', f: newPq }],
     fig: () => par({ col: { '0,0': 'c1', '1,0': 'c1' }, names: 1, vals: 1, only: ['0,0', '1,0'], noPar: 1 }), txt: 'Sind g und h parallel?',
-    eq: () => !pq.show ? '' : pq.d ? `α₁ = ${kz('c1', v(0, 0))}, α₂ = ${kz('c1', v(1, 0))}. Verschieden, also nicht parallel!` : `α₁ = α₂ = ${kz('c1', v(0, 0))}. Gleich, also parallel!` }
+    eq: () => !pq.show ? '' : pq.d ? `${kg('c1', 'α₁')} = ${kz('c1', v(0, 0))}, ${kg('c1', 'α₂')} = ${kz('c1', v(1, 0))}. Verschieden, also nicht parallel!` : `${kg('c1', 'α₁')} = ${kg('c1', 'α₂')} = ${kz('c1', v(0, 0))}. Gleich, also parallel!` }
 ];
 
 // ---------- Ablauf ----------

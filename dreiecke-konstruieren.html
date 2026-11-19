@@ -90,6 +90,8 @@ const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = a => a[rnd(0, a.length - 1)];
 // Gradzahl in der Farbe ihres Winkelbogens (Klasse wie beim wedge)
 const kz = (c, v) => `<span class="k ${c}">${v}°</span>`;
+// Winkelname in der Farbe seines Bogens
+const kg = (c, s) => `<span class="k ${c}">${s}</span>`;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const lines = (arr, n = arr.length) => arr.slice(0, n).map((l, i) => `<div class="${i < n - 1 ? 'dim' : ''}">${l}</div>`).join('');
 const text = (p, s, c = 'tx') => `<text class="${c}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="middle" dominant-baseline="central">${s}</text>`;
@@ -161,7 +163,7 @@ function sss(k) {
 }
 // SWS: c = 6, α = 50°, b = 4
 const WC = pol(4 * U, 50, A0);
-const SWS = ['1. Seite c = 6 cm zeichnen', `2. Winkel α = ${kz('c2', 50)} in A antragen`, '3. Auf dem Schenkel b = 4 cm abtragen', '4. C mit B verbinden'];
+const SWS = ['1. Seite c = 6 cm zeichnen', `2. Winkel ${kg('c2', 'α')} = ${kz('c2', 50)} in A antragen`, '3. Auf dem Schenkel b = 4 cm abtragen', '4. C mit B verbinden'];
 function sws(k) {
   let s = '';
   if (k >= 2) s += wedge(A0, 0, 50, 62, 'c2', '50°') + seg(A0, pol(380, 50, A0), 'thin');
@@ -171,7 +173,7 @@ function sws(k) {
 }
 // WSW: c = 6, α = 50°, β = 60°
 const WB = 6 * Math.sin(rad(60)) / Math.sin(rad(70)), VC = pol(WB * U, 50, A0);
-const WSW = ['1. Seite c = 6 cm zeichnen', `2. Winkel α = ${kz('c2', 50)} in A antragen`, `3. Winkel β = ${kz('c2', 60)} in B antragen`, '4. Die Schenkel schneiden sich in C'];
+const WSW = ['1. Seite c = 6 cm zeichnen', `2. Winkel ${kg('c2', 'α')} = ${kz('c2', 50)} in A antragen`, `3. Winkel ${kg('c2', 'β')} = ${kz('c2', 60)} in B antragen`, '4. Die Schenkel schneiden sich in C'];
 function wsw(k) {
   let s = '';
   if (k >= 2) s += wedge(A0, 0, 50, 62, 'c2', '50°') + seg(A0, pol(430, 50, A0), 'thin');

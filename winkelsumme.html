@@ -90,6 +90,8 @@ const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = a => a[rnd(0, a.length - 1)];
 // Gradzahl in der Farbe ihres Winkelbogens (Klasse wie beim wedge)
 const kz = (c, v) => `<span class="k ${c}">${v}°</span>`;
+// Winkelname in der Farbe seines Bogens
+const kg = (c, s) => `<span class="k ${c}">${s}</span>`;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const lines = (arr, n = arr.length) => arr.slice(0, n).map((l, i) => `<div class="${i < n - 1 ? 'dim' : ''}">${l}</div>`).join('');
 const text = (p, s, c = 'tx') => `<text class="${c}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="middle" dominant-baseline="central">${s}</text>`;
@@ -131,6 +133,7 @@ function outLab(v, p, q, s, cls = 'tx') {
 
 const rows = arr => arr.map(l => `<div>${l}</div>`).join('');
 const GR = ['α', 'β', 'γ', 'δ'], CL = ['c1', 'c2', 'c3', 'cr'];
+const G = i => kg(CL[i], GR[i]);
 
 // ---------- Dach ----------
 let n = 35;
@@ -248,9 +251,9 @@ function taskFig(t) {
 }
 function taskEq(t, sum) {
   if (!t.show) return '';
-  const k = t.v.length, u = GR[t.u], o = [...Array(k).keys()].filter(i => i !== t.u);
-  return rows([`${GR.slice(0, k).join(' + ')} = ${sum}° &nbsp;&nbsp;| ${o.map(i => '− ' + GR[i]).join(' ')}`,
-    `${u} = ${sum}° ${o.map(i => '− ' + GR[i]).join(' ')}`,
+  const k = t.v.length, u = G(t.u), o = [...Array(k).keys()].filter(i => i !== t.u);
+  return rows([`${[...Array(k).keys()].map(G).join(' + ')} = ${sum}° &nbsp;&nbsp;| ${o.map(i => '− ' + G(i)).join(' ')}`,
+    `${u} = ${sum}° ${o.map(i => '− ' + G(i)).join(' ')}`,
     `${u} = ${sum}° ${o.map(i => '− ' + kz(CL[i], t.v[i])).join(' ')} = ${kz(CL[t.u], t.v[t.u])}`]);
 }
 
@@ -267,12 +270,12 @@ const STEPS = [
   { t: 'α taucht oben wieder auf', ...TD, fig: () => triFig({ vals: 1, par: 1, cA: 1 }), txt: 'α und das obere α sind Wechselwinkel an den Parallelen.' },
   { t: 'β auch', ...TD, fig: () => triFig({ vals: 1, par: 1, cA: 1, cB: 1 }), txt: 'Auch β ist ein Wechselwinkel.' },
   { t: 'Oben liegen α, γ und β an einer Geraden', ...TD, fig: () => triFig({ vals: 1, par: 1, cA: 1, cB: 1 }),
-    txt: 'Zusammen ergeben sie eine gerade Linie.', eq: () => 'α + γ + β = 180°' },
+    txt: 'Zusammen ergeben sie eine gerade Linie.', eq: () => `${G(0)} + ${G(2)} + ${G(1)} = 180°` },
   // Die Antwort
   { t: 'Zurück zum Dach', rv: 1, enter: () => { n = 35; },
     btns: [{ l: '− 5°', f: () => setN(n - 5) }, { l: '+ 5°', f: () => setN(n + 5) }],
     fig: () => roofFig(shown),
-    eq: () => shown ? rows(['α + β + γ = 180° &nbsp;&nbsp;| − α − β', 'γ = 180° − α − β', `γ = 180° − ${kz('c1', n)} − ${kz('c2', n)} = ${kz('c3', 180 - 2 * n)}`]) : '' },
+    eq: () => shown ? rows([`${G(0)} + ${G(1)} + ${G(2)} = 180° &nbsp;&nbsp;| − ${G(0)} − ${G(1)}`, `${G(2)} = 180° − ${G(0)} − ${G(1)}`, `${G(2)} = 180° − ${kz('c1', n)} − ${kz('c2', n)} = ${kz('c3', 180 - 2 * n)}`]) : '' },
   // Viereck
   { t: 'Ein Viereck hat vier Innenwinkel', rv: 1, down: quadDown, drag: quadDrag, fig: () => quadFig({ vals: 1 }),
     txt: () => shown ? 'Im Viereck sind alle vier Winkel zusammen 360°.' : 'Was fällt auf?',

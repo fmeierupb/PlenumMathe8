@@ -175,9 +175,12 @@ function draw(o) {
   return s;
 }
 // Zahl in der Farbe ihres Winkelbogens: α und γ blau, β und δ orange, sonst die Klasse direkt (k1, k2, kr)
-const kz = (k, v) => `<span class="${{ al: 'k1', ga: 'k1', be: 'k2', de: 'k2' }[k] || k}">${v}°</span>`;
+const KC = { al: 'k1', ga: 'k1', be: 'k2', de: 'k2' };
+const kz = (k, v) => `<span class="${KC[k] || k}">${v}°</span>`;
+// Winkelname in der Farbe seines Bogens
+const kg = k => `<span class="${KC[k]}">${GR[k]}</span>`;
 const SP = [['al', 'ga'], ['be', 'de']], NP = [['al', 'be'], ['be', 'ga'], ['ga', 'de'], ['de', 'al']];
-const WL = ['α + β = 180°', 'γ + β = 180°', 'α + β = γ + β &nbsp;&nbsp;| − β', 'α = γ'];
+const WL = [`${kg('al')} + ${kg('be')} = 180°`, `${kg('ga')} + ${kg('be')} = 180°`, `${kg('al')} + ${kg('be')} = ${kg('ga')} + ${kg('be')} &nbsp;&nbsp;| − ${kg('be')}`, `${kg('al')} = ${kg('ga')}`];
 const why = n => ({
   t: 'Warum sind Scheitelwinkel gleich groß?', drag: cross,
   fig: () => draw({ names: 1, vals: 1, only: ['al', 'be', 'ga'], hi: [['al', 'be'], ['ga', 'be'], ['al', 'be', 'ga'], ['al', 'ga']][n - 1] }),
@@ -219,11 +222,11 @@ const STEPS = [
   { t: 'Es entstehen vier Winkel', drag: cross, fig: () => draw({ names: 1 }) },
   { t: 'Nebenwinkel', rv: 1, drag: cross, fig: () => draw({ names: 1, vals: 1, only: ['al', 'be'], hi: ['al', 'be'], hidden: shown ? {} : { be: true } }),
     txt: () => shown ? 'Nebenwinkel liegen nebeneinander an einer Geraden. Zusammen ergeben sie 180°.' : '',
-    eq: () => shown ? `<div>α + β = 180° &nbsp;&nbsp;| − α</div><div>β = 180° − α</div><div>β = 180° − ${kz('al', a)} = ${kz('be', 180 - a)}</div>` : '' },
+    eq: () => shown ? `<div>${kg('al')} + ${kg('be')} = 180° &nbsp;&nbsp;| − ${kg('al')}</div><div>${kg('be')} = 180° − ${kg('al')}</div><div>${kg('be')} = 180° − ${kz('al', a)} = ${kz('be', 180 - a)}</div>` : '' },
   { t: 'An der Kreuzung gibt es vier Paare von Nebenwinkeln', drag: cross, btns: [{ l: 'Anderes Paar', f: () => { pair++; } }],
     fig: () => draw({ names: 1, vals: 1, hi: NP[pair % 4] }),
     // Endformel wie auf der Folie Nebenwinkel, für das gerade gezeigte Paar und live beim Drehen
-    eq: () => { const [x, y] = NP[pair % 4]; return `${GR[y]} = 180° − ${kz(x, val(x))} = ${kz(y, val(y))}`; } },
+    eq: () => { const [x, y] = NP[pair % 4]; return `${kg(y)} = 180° − ${kz(x, val(x))} = ${kz(y, val(y))}`; } },
   // Die Antwort
   { t: 'Zurück zur Fußleiste', c: JR, enter: () => { wood(); rev = false; }, drag: cut, btns: [{ l: 'Auflösen', f: () => { rev = !rev; } }],
     fig: () => boardFig(rev), txt: () => rev ? 'Schnittwinkel und Winkel am Reststück sind Nebenwinkel.' : cutTxt(), eq: () => rev ? `180° − ${kz('k1', a)} = ${kz('kr', 180 - a)}` : '' },
@@ -231,7 +234,7 @@ const STEPS = [
   { t: 'Was fällt auf?', drag: cross, fig: () => draw({ names: 1, vals: 1 }) },
   { t: 'Scheitelwinkel', drag: cross, btns: [{ l: 'Anderes Paar', f: () => { pair++; } }], txt: 'Scheitelwinkel liegen sich gegenüber. Sie sind gleich groß.',
     fig: () => draw({ names: 1, vals: 1, hi: SP[pair % 2] }),
-    eq: () => { const p = SP[pair % 2]; return `${GR[p[0]]} = ${GR[p[1]]} = ${kz(p[0], val(p[0]))}`; } },
+    eq: () => { const p = SP[pair % 2]; return `${kg(p[0])} = ${kg(p[1])} = ${kz(p[0], val(p[0]))}`; } },
   why(1), why(2), why(3), why(4),
   // Aufgaben
   { t: 'Aufgabe: Ein Winkel reicht', enter: newQuiz, tap: quizTap, btns: [{ l: 'Neue Aufgabe', f: newQuiz }], fig: quizFig },

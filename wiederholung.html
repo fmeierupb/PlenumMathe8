@@ -106,6 +106,8 @@ const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = a => a[rnd(0, a.length - 1)];
 // Gradzahl in der Farbe ihres Winkelbogens (Klasse wie beim wedge)
 const kz = (c, v) => `<span class="k ${c}">${v}°</span>`;
+// Winkelname in der Farbe seines Bogens
+const kg = (c, s) => `<span class="k ${c}">${s}</span>`;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const lines = (arr, n = arr.length) => arr.slice(0, n).map((l, i) => `<div class="${i < n - 1 ? 'dim' : ''}">${l}</div>`).join('');
 const text = (p, s, c = 'tx') => `<text class="${c}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="middle" dominant-baseline="central">${s}</text>`;
@@ -319,13 +321,13 @@ const STEPS = [
     eq: () => join([vis('par') && 'f ∥ g', vis('perp') && 'h ⊥ f &nbsp;&nbsp; h ⊥ g', vis('cut') && 'j, k: nicht parallel']) },
   { t: 'Teile eines Winkels', rv: 1, parts: ['scheitel', 'schenkel', 'bogen'], c: LS, enter: () => { lw = 110; }, hit: laptopHit, drag: laptopDrag, fig: laptopFig,
     txt: () => done() ? 'Jeder Winkel hat einen Scheitelpunkt, zwei Schenkel und einen Winkelbogen.' : 'Klappst du einen Laptop auf, entsteht ein Winkel α. Wie heißen seine Teile?',
-    eq: () => done() ? `α = ${kz('c1', lw)}` : '' },
+    eq: () => done() ? `${kg('c1', 'α')} = ${kz('c1', lw)}` : '' },
   { t: 'Winkelarten', rv: 1, parts: ['k0', 'k1', 'k2', 'k3'], hit: kindsHit, fig: kindsFig,
     txt: () => done() ? 'Genau 90° ist ein rechter Winkel. Die Grenzen sind 90° und 180°.' : 'Wie heißen diese Winkelarten?' },
   { t: 'Winkel messen', rv: 1, fig: () => measureFig(shown),
     txt: () => shown ? 'Lies auf der Skala ab, die an deinem ersten Schenkel bei 0° beginnt.' : 'Nullpunkt auf den Scheitelpunkt, 0-Linie auf einen Schenkel, kurzen Schenkel verlängern. Welche Zahl stimmt?',
-    eq: () => shown ? `α = ${kz('c1', MA)}, denn der Winkel ist spitz.` : '' },
-  { t: 'Winkel zeichnen', enter: () => { zs = 1; }, fig: drawFig, txt: () => `Schritt ${zs}: ${ZT[zs]}`, eq: () => `α = ${kz('c1', zw)}`,
+    eq: () => shown ? `${kg('c1', 'α')} = ${kz('c1', MA)}, denn der Winkel ist spitz.` : '' },
+  { t: 'Winkel zeichnen', enter: () => { zs = 1; }, fig: drawFig, txt: () => `Schritt ${zs}: ${ZT[zs]}`, eq: () => `${kg('c1', 'α')} = ${kz('c1', zw)}`,
     btns: [{ l: 'Nächster Schritt', f: () => { zs = Math.min(5, zs + 1); }, dis: () => zs === 5 }] }
 ];
 

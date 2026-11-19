@@ -102,6 +102,8 @@ const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const pick = a => a[rnd(0, a.length - 1)];
 // Gradzahl in der Farbe ihres Winkelbogens (Klasse wie beim wedge)
 const kz = (c, v) => `<span class="k ${c}">${v}°</span>`;
+// Winkelname in der Farbe seines Bogens
+const kg = (c, s) => `<span class="k ${c}">${s}</span>`;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const lines = (arr, n = arr.length) => arr.slice(0, n).map((l, i) => `<div class="${i < n - 1 ? 'dim' : ''}">${l}</div>`).join('');
 const text = (p, s, c = 'tx') => `<text class="${c}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="middle" dominant-baseline="central">${s}</text>`;
@@ -222,13 +224,13 @@ const RT = ['', 'Rechne: 360° − 300° = 60°.', 'Zeichne 60° wie gewohnt.', 
 
 // ---------- Folien ----------
 const STEPS = [
-  { t: 'Spitzen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(40, 0), txt: () => `Schritt ${zs}: ${drawTxt(40, 0)}`, eq: () => `α = ${kz('c1', 40)}`, btns: stepBtn(5) },
-  { t: 'Stumpfen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(130, 180), txt: () => `Schritt ${zs}: ${drawTxt(130, 180)}`, eq: () => `α = ${kz('c1', 130)}`, btns: stepBtn(5) },
+  { t: 'Spitzen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(40, 0), txt: () => `Schritt ${zs}: ${drawTxt(40, 0)}`, eq: () => `${kg('c1', 'α')} = ${kz('c1', 40)}`, btns: stepBtn(5) },
+  { t: 'Stumpfen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(130, 180), txt: () => `Schritt ${zs}: ${drawTxt(130, 180)}`, eq: () => `${kg('c1', 'α')} = ${kz('c1', 130)}`, btns: stepBtn(5) },
   { t: 'Welche Skala?', rv: 1, parts: KK, hit: checkHit, fig: checkFig,
     txt: () => done() ? 'Ein spitzer Winkel muss spitz aussehen, ein stumpfer stumpf. Sonst war es die falsche Skala.' : 'Zu jeder Aufgabe gibt es zwei Zeichnungen. Welche stimmt?',
     eq: () => [vis('b') && `180° − ${kz('c1', 40)} = ${kz('c1', 140)}`, vis('c') && `180° − ${kz('c1', 130)} = ${kz('c1', 50)}`].filter(Boolean).join(' &nbsp;&nbsp; ') },
   { t: 'Überstumpfen Winkel zeichnen', enter: () => { zs = 1; }, fig: reflexFig, txt: () => `Schritt ${zs}: ${RT[zs]}`,
-    eq: () => zs === 1 ? `360° − ${kz('c1', 300)} = ${kz('n', 60)}` : `α = ${kz('c1', 300)}`, btns: stepBtn(3) }
+    eq: () => zs === 1 ? `360° − ${kz('c1', 300)} = ${kz('n', 60)}` : `${kg('c1', 'α')} = ${kz('c1', 300)}`, btns: stepBtn(3) }
 ];
 
 // ---------- Ablauf ----------
