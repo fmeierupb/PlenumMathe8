@@ -159,7 +159,14 @@ function turnDrag(w) {
   for (const q of [90, 180, 270, 360]) if (Math.abs(n - q) <= 3) n = q;
   t = n;
 }
-const lineFig = () => wedge(M, 0, 180, 150, 'c1', shown ? '180°' : '') + wedge(M, 180, 360, 150, 'c2', shown ? '180°' : '') + seg(pol(520, 0), pol(520, 180)) + dot(M);
+// Folie 3 in Schritten: Halbkreis wie beim Drehen, dann die zweite Hälfte, dann wird aus den Schenkeln die Gerade, dann die Rechnung.
+function lineFig() {
+  if (!shown) { const x = t; t = 180; const s = fullFig(); t = x; return s; }
+  if (sub === 1) return `<circle cx="${M.x}" cy="${M.y}" r="150" fill="none" stroke="var(--mut)" stroke-width="3"/>` + wedge(M, 0, 180, 150, 'c1') + wedge(M, 180, 360, 150, 'c2') + seg(M, pol(150, 0)) + seg(M, pol(150, 180)) + dot(M);
+  const l = sub >= 3 ? '180°' : '';
+  return wedge(M, 0, 180, 150, 'c1', l) + wedge(M, 180, 360, 150, 'c2', l) + seg(pol(520, 0), pol(520, 180)) + dot(M);
+}
+const LT = ['Ein halber Kreis', 'Die andere Hälfte', 'Eine Gerade teilt den Kreis in zwei Hälften', 'Die Hälfte davon sind 180°'];
 // ---------- Zwei Geraden ----------
 // o: names, vals, hi (hervorgehoben), only (nur diese beschriften), hidden (Wert verdeckt), color, fixed
 function draw(o) {
@@ -218,7 +225,7 @@ const STEPS = [
   { t: 'Eine Fußleiste wird schräg abgesägt', c: JR, enter: wood, drag: cut, fig: () => boardFig(false), txt: cutTxt },
   // Vom Kreis zur Geraden
   { t: () => t === 360 ? 'Ein voller Kreis hat 360°' : 'Ein voller Kreis', enter: () => { t = 0; }, drag: turnDrag, fig: fullFig, each: m => { const x = t; t = 360; m(); t = x; } },
-  { t: () => shown ? 'Die Hälfte davon sind 180°' : 'Eine Gerade teilt den Kreis in zwei Hälften', rv: 1, fig: lineFig, eq: () => shown ? '360° : 2 = 180°' : '' },
+  { t: () => LT[shown ? sub : 0], rv: 3, fig: lineFig, eq: () => shown && sub >= 3 ? '360° : 2 = 180°' : '' },
   // Zweite Gerade: Nebenwinkel
   { t: 'Zwei Geraden kreuzen sich', enter: wood, drag: cross, fig: () => draw({}) },
   { t: 'Es entstehen vier Winkel', drag: cross, fig: () => draw({ names: 1 }) },
