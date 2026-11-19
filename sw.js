@@ -1,5 +1,5 @@
 // Eigener Cache-Präfix, damit andere Werkzeuge unter derselben Adresse unberührt bleiben.
-const CACHE = 'plenum-bcf72ccd';
+const CACHE = 'plenum-37527442';
 // Alles, was beim ersten Aufruf in den Speicher kommt.
 const FILES = [
   './',

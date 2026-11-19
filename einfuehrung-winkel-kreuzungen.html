@@ -22,6 +22,8 @@ h1{margin:0;font-size:clamp(26px,4.2vw,52px);line-height:1.15;min-height:1.2em}
 #txt{font-size:clamp(18px,2.6vw,32px);min-height:1.4em;text-align:center}
 #eq{font-size:clamp(22px,3.6vw,44px);font-weight:700;min-height:1.4em;text-align:center;font-variant-numeric:tabular-nums;line-height:1.35}
 #eq .dim{opacity:.4;font-size:.8em}
+#eq .k1{color:var(--c1)}
+#eq .k2{color:var(--c2)}
 footer{display:flex;gap:10px;align-items:center;margin-top:10px}
 #extras{display:flex;gap:10px;margin:0 auto}
 button{font:inherit;font-size:clamp(16px,2vw,24px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;cursor:pointer;touch-action:manipulation}
@@ -171,6 +173,8 @@ function draw(o) {
   s += seg(pol(520, 0), pol(520, 180)) + seg(pol(520, a), pol(520, a + 180));
   return s;
 }
+// Zahl in der Farbe ihres Winkelbogens: α und γ blau, β und δ orange
+const kz = (k, v) => `<span class="${k === 'al' || k === 'ga' ? 'k1' : 'k2'}">${v}°</span>`;
 const SP = [['al', 'ga'], ['be', 'de']], NP = [['al', 'be'], ['be', 'ga'], ['ga', 'de'], ['de', 'al']];
 const WL = ['α + β = 180°', 'γ + β = 180°', 'α + β = γ + β &nbsp;&nbsp;| − β', 'α = γ'];
 const why = n => ({
@@ -214,11 +218,11 @@ const STEPS = [
   { t: 'Es entstehen vier Winkel', drag: cross, fig: () => draw({ names: 1 }) },
   { t: 'Nebenwinkel', rv: 1, drag: cross, fig: () => draw({ names: 1, vals: 1, only: ['al', 'be'], hi: ['al', 'be'], hidden: shown ? {} : { be: true } }),
     txt: () => shown ? 'Nebenwinkel liegen nebeneinander an einer Geraden. Zusammen ergeben sie 180°.' : '',
-    eq: () => shown ? `<div>α + β = 180° &nbsp;&nbsp;| − α</div><div>β = 180° − α</div><div>β = 180° − ${a}° = ${180 - a}°</div>` : '' },
+    eq: () => shown ? `<div>α + β = 180° &nbsp;&nbsp;| − α</div><div>β = 180° − α</div><div>β = 180° − ${kz('al', a)} = ${kz('be', 180 - a)}</div>` : '' },
   { t: 'An der Kreuzung gibt es vier Paare von Nebenwinkeln', drag: cross, btns: [{ l: 'Anderes Paar', f: () => { pair++; } }],
     fig: () => draw({ names: 1, vals: 1, hi: NP[pair % 4] }),
     // Endformel wie auf der Folie Nebenwinkel, für das gerade gezeigte Paar und live beim Drehen
-    eq: () => { const [x, y] = NP[pair % 4]; return `${GR[y]} = 180° − ${val(x)}° = ${val(y)}°`; } },
+    eq: () => { const [x, y] = NP[pair % 4]; return `${GR[y]} = 180° − ${kz(x, val(x))} = ${kz(y, val(y))}`; } },
   // Die Antwort
   { t: 'Zurück zur Fußleiste', c: JR, enter: () => { wood(); rev = false; }, drag: cut, btns: [{ l: 'Auflösen', f: () => { rev = !rev; } }],
     fig: () => boardFig(rev), txt: () => rev ? 'Schnittwinkel und Winkel am Reststück sind Nebenwinkel.' : cutTxt(), eq: () => rev ? `180° − ${a}° = ${180 - a}°` : '' },
