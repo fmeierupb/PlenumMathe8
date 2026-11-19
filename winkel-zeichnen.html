@@ -170,47 +170,6 @@ function geoTri(c, u, o = {}) {
   return s + circ(c, 5, 'geoL');
 }
 
-// ---------- Das Geodreieck ----------
-// Teile einzeln antippen: Nullpunkt, Zeichenkante, äußere Skala, innere Skala.
-const GV = P(400, 440), GU = 41;
-const GP = ['null', 'kante', 'cm', 'aussen', 'innen', 'mitte', 'hilfs'];
-// Beschriftung mit Hinweislinie: pts vom Ziel zum Beschriftungsende in cm-Koordinaten. side: +1 Text rechts, -1 links, 0 darunter.
-function callout(Q, pts, label, side) {
-  const ps = pts.map(([x, y]) => Q(x, y)), e = ps[ps.length - 1];
-  let s = `<polyline class="lead" points="${ps.map(p => f(p.x) + ',' + f(p.y)).join(' ')}"/>` + dot(ps[0], 4);
-  if (side === 0) return s + text(P(e.x, e.y + 16), label, 'tm');
-  return s + `<text class="tm" x="${f(e.x + 6 * side)}" y="${f(e.y)}" text-anchor="${side > 0 ? 'start' : 'end'}" dominant-baseline="central">${label}</text>`;
-}
-// Punkt in cm-Koordinaten auf dem Strahl unter dem Winkel th im Abstand r vom Nullpunkt
-const cp = (th, r) => [r * Math.cos(rad(th)), r * Math.sin(rad(th))];
-function geoFig() {
-  const hi = {}; GP.forEach(k => { hi[k] = vis(k); });
-  const Q = (x, y) => P(GV.x + x * GU, GV.y - y * GU);
-  let s = geoTri(GV, GU, { hi });
-  if (hi.kante) s += seg(Q(-8, 0), Q(8, 0), 'hi') + callout(Q, [[4.5, 0], [4.5, -0.55]], 'Zeichenkante', 0);
-  if (hi.null) s += circ(GV, 16, 'hi') + callout(Q, [[0, -0.4], [0, -0.55]], 'Nullpunkt', 0);
-  if (hi.cm) s += callout(Q, [[-4.5, 0.2], [-4.5, -0.55]], 'Längenskala', 0);
-  // Hinweislinien laufen genau zwischen zwei Zahlen hindurch (5° neben einem Zehner).
-  if (hi.aussen) { const e = cp(35, 6.4); s += callout(Q, [cp(35, GRo - 0.72), e, [e[0] + 0.3, e[1]]], 'äußere Skala', 1); }
-  if (hi.innen) { const e = cp(145, 6.4); s += callout(Q, [cp(145, GRo - 1.25), e, [e[0] - 0.3, e[1]]], 'innere Skala', -1); }
-  if (hi.mitte) { const e = cp(85, 7.7); s += callout(Q, [[0, 2.75], [2.75 / Math.tan(rad(85)), 2.75], e, [e[0] + 0.3, e[1]]], 'Mittellinie', 1); }
-  if (hi.hilfs) { const t = 2.5 / Math.sin(rad(105)), e = cp(105, 7.7); s += callout(Q, [cp(105, t), e, [e[0] - 0.3, e[1]]], 'Hilfslinien', -1); }
-  return s;
-}
-function geoHit(p) {
-  const x = (p.x - GV.x) / GU, y = (GV.y - p.y) / GU, ax = Math.abs(x), r = Math.hypot(x, y);
-  if (r < 0.7) return 'null';
-  if (Math.abs(y) < 0.12 && ax <= 8.2) return 'kante';
-  if (y < 0 && y > -1.4 && ax <= 8.2) return x >= 0 ? 'kante' : 'cm';
-  if (y > 0 && y < 0.85 && ax < 7.6) return 'cm';
-  if (y <= 0) return null;
-  if (r < GRi) return ax < 0.35 ? 'mitte' : 'hilfs';
-  if (r < GRo - 1.0) return 'innen';
-  if (r < GRo + 0.3) return 'aussen';
-  if (8 - ax - y > 0) return null;
-  return x < 0 ? 'innen' : 'aussen';
-}
-
 // ---------- Winkel Schritt für Schritt zeichnen ----------
 // d0: Richtung des ersten Schenkels (0 nach rechts, 180 nach links). Das Geodreieck liegt immer mit 0 nach rechts.
 const ZV = P(400, 430);
@@ -260,8 +219,6 @@ const RT = ['', 'Rechne: 360° − 300° = 60°.', 'Zeichne 60° wie gewohnt.', 
 
 // ---------- Folien ----------
 const STEPS = [
-  { t: 'Das Geodreieck', rv: 1, parts: GP, hit: geoHit, fig: geoFig,
-    txt: () => done() ? 'Die äußere Skala beginnt rechts bei 0°, die innere links. Lies immer die Skala, die an deinem ersten Schenkel bei 0° beginnt.' : 'Wie heißen die Teile des Geodreiecks?' },
   { t: 'Spitzen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(40, 0), txt: () => `Schritt ${zs}: ${drawTxt(40, 0)}`, eq: () => 'α = 40°', btns: stepBtn(5) },
   { t: 'Stumpfen Winkel zeichnen', enter: () => { zs = 1; }, fig: () => drawFig(130, 180), txt: () => `Schritt ${zs}: ${drawTxt(130, 180)}`, eq: () => 'α = 130°', btns: stepBtn(5) },
   { t: 'Welche Skala?', rv: 1, parts: KK, hit: checkHit, fig: checkFig,
