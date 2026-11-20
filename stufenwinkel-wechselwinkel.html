@@ -163,8 +163,9 @@ function par(o = {}) {
   return s;
 }
 // f zeigt zum Finger. Außerhalb von 35° bis 145° bleibt f an der Grenze, an der es gerade steht, statt auf die andere Seite zu springen.
-function rot(w) { const n = ((Math.round(w) % 180) + 180) % 180; a = n >= 35 && n <= 145 ? n : a < 90 ? 35 : 145; }
-function tilt(w) { let x = w > 180 ? w - 360 : w; if (x > 90) x -= 180; if (x < -90) x += 180; tlt = Math.abs(x) < 2 ? 0 : clamp(Math.round(x), -15, 15); }
+// Alle Beispielwinkel glatt auf 10.
+function rot(w) { const n = ((Math.round(w / 10) * 10 % 180) + 180) % 180; a = n >= 40 && n <= 140 ? n : a < 90 ? 40 : 140; }
+function tilt(w) { let x = w > 180 ? w - 360 : w; if (x > 90) x -= 180; if (x < -90) x += 180; tlt = clamp(Math.round(x / 10) * 10, -10, 10); }
 
 // Begründung der Stufenwinkel: g wird an f entlang verschoben und nimmt seinen Winkel mit. Auf h ist das α₂.
 // Schritt 1: Verschieben. Schritt 2: α₁ und α₂ an ihren Kreuzungen.
@@ -196,16 +197,16 @@ const KY = 400, K1 = P(170, KY), K2 = P(440, KY), K3 = P(710, KY);
 const stripe = (p, w, c = 'strp') => seg(p, pol((KY - 55) / Math.sin(rad(w)), w, p), c);
 function parkFig(q) {
   let s = `<rect class="asph" x="0" y="40" width="800" height="${KY - 40}"/><rect class="curb" x="0" y="${KY}" width="800" height="36"/>`;
-  s += text(P(400, KY + 64), 'Bordstein', 'ts') + wedge(K1, 0, 65, 62, 'c1', '65°', 'tk') + stripe(K1, 65);
+  s += text(P(400, KY + 64), 'Bordstein', 'ts') + wedge(K1, 0, 60, 62, 'c1', '60°', 'tk') + stripe(K1, 60);
   if (q) return s + `<circle cx="${K2.x}" cy="${K2.y}" r="9" fill="#fff"/>` + text(pol(100, 45, K2), '?', 'tk');
-  s += wedge(K2, 0, b, 62, b === 65 ? 'c1' : 'cr', b + '°', 'tk') + stripe(K2, b, marked ? 'strp' : 'strd');
-  if (marked) s += wedge(K3, 0, 65, 62, 'c1', '65°', 'tk') + stripe(K3, 65);
+  s += wedge(K2, 0, b, 62, b === 60 ? 'c1' : 'cr', b + '°', 'tk') + stripe(K2, b, marked ? 'strp' : 'strd');
+  if (marked) s += wedge(K3, 0, 60, 62, 'c1', '60°', 'tk') + stripe(K3, 60);
   return s;
 }
 function setB(x) { b = clamp(x, 30, 150); marked = false; }
 
 // ---------- Aufgaben ----------
-function newQ8() { let n; do n = rnd(35, 145); while (n === 90 || n === a); a = n; q8 = { given: key(rnd(0, 1), rnd(0, 3)), shown: {} }; }
+function newQ8() { let n; do n = 10 * rnd(4, 14); while (n === 90 || n === a); a = n; q8 = { given: key(rnd(0, 1), rnd(0, 3)), shown: {} }; }
 function q8Fig() {
   const h = {}, c = {};
   for (let k = 0; k < 2; k++) for (let i = 0; i < 4; i++) {
@@ -221,8 +222,8 @@ function q8Tap(w, p) {
 }
 // Erste Aufgabe ist nicht parallel, danach zufällig.
 function newPq(first) {
-  const old = pq; let n; do n = rnd(50, 130); while (n === 90 || (old && old.a === n));
-  pq = { a: n, d: first === true ? 2 : pick([-2, 0, 2]), show: false }; a = n; tlt = pq.d;
+  const old = pq; let n; do n = 10 * rnd(5, 13); while (n === 90 || (old && old.a === n));
+  pq = { a: n, d: first === true ? 10 : pick([-10, 0, 10]), show: false }; a = n; tlt = pq.d;
 }
 
 const WP = [[0, 0, 1, 2], [0, 1, 1, 3], [0, 2, 1, 0], [0, 3, 1, 1]];
@@ -237,7 +238,7 @@ const onGo = () => { tlt = 0; off = 0; };
 
 const STEPS = [
   // Die Frage
-  { t: 'Schräge Parkplätze werden markiert', fig: () => parkFig(true), txt: 'Die erste Linie hat 65° zum Bordstein. Die nächste soll parallel sein. Welchen Winkel braucht sie?' },
+  { t: 'Schräge Parkplätze werden markiert', fig: () => parkFig(true), txt: 'Die erste Linie hat 60° zum Bordstein. Die nächste soll parallel sein. Welchen Winkel braucht sie?' },
   // Stufenwinkel
   { t: 'Zwei parallele Geraden und eine dritte', drag: rot, fig: () => par(), txt: 'g und h sind parallel. Die Gerade f schneidet beide.' },
   { t: 'Es entstehen acht Winkel', drag: rot, fig: () => par({ names: 1 }) },
@@ -246,17 +247,17 @@ const STEPS = [
     txt: () => shown ? 'Stufenwinkel liegen an beiden Kreuzungen an der gleichen Stelle. Bei parallelen Geraden sind sie gleich groß.' : '',
     eq: () => { const i = pair % 4; return shown ? `${kg('c1', nm(0, i))} = ${kg('c1', nm(1, i))} = ${kz('c1', v(0, i))}` : ''; } },
   whyS(1), whyS(2),
-  { t: 'Und wenn g und h nicht parallel sind?', c: () => C()[1], enter: () => { tlt = 8; }, drag: tilt, each: m => { const x = tlt; tlt = 0; m(); tlt = x; },
+  { t: 'Und wenn g und h nicht parallel sind?', c: () => C()[1], enter: () => { tlt = 10; }, drag: tilt, each: m => { const x = tlt; tlt = 0; m(); tlt = x; },
     fig: () => par({ col: { '0,0': 'c1', '1,0': 'c1' }, names: 1, vals: 1, only: ['0,0', '1,0'] }),
     txt: () => tlt === 0 ? 'g und h sind parallel. Die Stufenwinkel sind gleich groß.' : 'g und h sind nicht parallel. Die Stufenwinkel sind verschieden groß.',
     eq: () => `${kg('c1', 'α₁')} = ${kz('c1', v(0, 0))} &nbsp;&nbsp; ${kg('c1', 'α₂')} = ${kz('c1', v(1, 0))}` },
   // Die Antwort
-  { t: 'Zurück zum Parkplatz', c: K2, enter: () => { b = 50; marked = false; }, each: m => { const x = b; b = 65; m(); b = x; },
-    drag: w => { if (w > 180) w = w > 270 ? 0 : 180; setB(Math.round(w / 5) * 5); },
-    btns: [{ l: '− 5°', f: () => setB(b - 5) }, { l: '+ 5°', f: () => setB(b + 5) }, { l: 'Aufmalen', f: () => { marked = true; }, dis: () => marked || b !== 65 }],
+  { t: 'Zurück zum Parkplatz', c: K2, enter: () => { b = 40; marked = false; }, each: m => { const x = b; b = 60; m(); b = x; },
+    drag: w => { if (w > 180) w = w > 270 ? 0 : 180; setB(Math.round(w / 10) * 10); },
+    btns: [{ l: '− 10°', f: () => setB(b - 10) }, { l: '+ 10°', f: () => setB(b + 10) }, { l: 'Aufmalen', f: () => { marked = true; }, dis: () => marked || b !== 60 }],
     fig: () => parkFig(false),
-    txt: () => b === 65 ? 'Gleiche Stufenwinkel: Die Linien sind parallel.' : 'Verschiedene Stufenwinkel: Die Linien sind nicht parallel.',
-    eq: () => `${kz('c1', 65)} ${b === 65 ? '=' : '≠'} ${kz(b === 65 ? 'c1' : 'cr', b)}` },
+    txt: () => b === 60 ? 'Gleiche Stufenwinkel: Die Linien sind parallel.' : 'Verschiedene Stufenwinkel: Die Linien sind nicht parallel.',
+    eq: () => `${kz('c1', 60)} ${b === 60 ? '=' : '≠'} ${kz(b === 60 ? 'c1' : 'cr', b)}` },
   // Wechselwinkel
   { t: 'Wechselwinkel', rv: 1, drag: rot, btns: [{ l: 'Anderes Paar', f: () => { pair++; } }],
     fig: () => { const [k1, i1, k2, i2] = WP[pair % 4], c = {}, h = {}; c[key(k1, i1)] = 'c1'; c[key(k2, i2)] = 'c3'; if (!shown) h[key(k2, i2)] = 1; return par({ col: c, names: 1, vals: 1, only: Object.keys(c), hidden: h }); },
