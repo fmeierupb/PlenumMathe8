@@ -194,11 +194,11 @@ const whyS = n => ({
 });
 
 // ---------- Parkplatz ----------
-const KY = 400, K1 = P(170, KY), K2 = P(440, KY), K3 = P(710, KY);
+const KY = 400, K0 = P(20, KY), K1 = P(210, KY), K2 = P(400, KY), K3 = P(590, KY);
 const stripe = (p, w, c = 'strp') => seg(p, pol((KY - 55) / Math.sin(rad(w)), w, p), c);
 function parkFig(q) {
   let s = `<rect class="asph" x="0" y="40" width="800" height="${KY - 40}"/><rect class="curb" x="0" y="${KY}" width="800" height="36"/>`;
-  s += text(P(400, KY + 64), 'Bordstein', 'ts') + wedge(K1, 0, 60, 62, 'c1', '60°', 'tk') + stripe(K1, 60);
+  s += text(P(400, KY + 64), 'Bordstein', 'ts') + stripe(K0, 60) + wedge(K1, 0, 60, 62, 'c1', '60°', 'tk') + stripe(K1, 60);
   if (q) return s + `<circle cx="${K2.x}" cy="${K2.y}" r="9" fill="#fff"/>` + text(pol(100, 45, K2), '?', 'tk');
   s += wedge(K2, 0, b, 62, b === 60 ? 'c1' : 'cr', b + '°', 'tk') + stripe(K2, b, marked ? 'strp' : 'strd');
   if (marked) s += wedge(K3, 0, 60, 62, 'c1', '60°', 'tk') + stripe(K3, 60);
