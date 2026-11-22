@@ -64,7 +64,7 @@ svg .curb{fill:#c9c6bd}
 svg .strp{stroke:#fff;stroke-width:9}
 svg .strd{stroke:#fff;stroke-width:6;stroke-dasharray:18 12;opacity:.85}
 svg .tk{fill:#fff;font:700 30px system-ui,sans-serif}
-svg .gh{stroke:var(--c1);stroke-width:4;stroke-dasharray:16 10;fill:none}
+svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
 </style>
 </head>
 <body>
@@ -174,19 +174,20 @@ function stufFig(n) {
   if (n === 2) col['1,0'] = 'c1';
   // Nur die beteiligten Winkel, damit sich nahe h nichts überlagert. Liegt die Kopie auf h, wird keine zweite Linie über h gezeichnet.
   let s = par({ col, names: 1, vals: 1, only: Object.keys(col), bare: 1 });
-  if (n === 1) s += (off < 1 ? xline(Q, 0, 'gh') : '') + wedge(Q, 0, a, 78, 'c1', `α₂ = ${w}°`, 'tx', 150);
+  // Die Kopie startet auf g. Ihr Winkel erscheint erst, wenn sie sich von g gelöst hat.
+  if (n === 1) s += (off < 1 ? xline(Q, 0, 'gh') : '') + (off >= 0.2 ? wedge(Q, 0, a, 78, 'c1', `α₂ = ${w}°`, 'tx', 150) : '');
   return s;
 }
 function shiftDrag(w, p) {
   const t = (p.y - GY) / (HY - GY);
-  off = off === 1 ? (t < 0.85 ? clamp(t, 0.25, 1) : 1) : (t >= 0.93 ? 1 : clamp(t, 0.25, 1));
+  off = off === 1 ? (t < 0.85 ? clamp(t, 0, 1) : 1) : (t >= 0.93 ? 1 : clamp(t, 0, 1));
 }
 const WS = `${kg('c1', 'α₂')} = ${kg('c1', 'α₁')} &nbsp;&nbsp; verschoben, g ∥ h`;
 const whyS = n => ({
   grp: 'whyS',
   t: 'Warum sind Stufenwinkel gleich groß?', fig: () => stufFig(n),
   eq: () => n === 2 || off === 1 ? WS : '',
-  enter: () => { off = n === 1 ? 0.4 : 1; }, drag: n === 1 ? shiftDrag : rot,
+  enter: () => { off = n === 1 ? 0 : 1; }, drag: n === 1 ? shiftDrag : rot,
   each: m => { const o = off; off = 0.4; m(); off = 1; m(); off = o; },
   txt: n === 1 ? () => off === 1 ? 'g und h sind parallel. Deshalb liegt die verschobene Gerade g genau auf h.' : 'Schieb g an f entlang nach unten. Beim Verschieben ändert sich der Winkel nicht.'
     : 'Stufenwinkel an parallelen Geraden sind gleich groß.'
