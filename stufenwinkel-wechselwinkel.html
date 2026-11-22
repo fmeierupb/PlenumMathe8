@@ -135,7 +135,7 @@ function outLab(v, p, q, s, cls = 'tx') {
 
 // ---------- Zwei Parallelen und eine Gerade ----------
 const GY = 130, HY = 390, F0 = P(400, 260);
-let a = 60, tlt = 0, off = 0, b = 50, marked = false, q8 = null, pq = null;
+let a = 60, tlt = 0, off = 0, b = 50, marked = false, q8 = null;
 const NM = ['α', 'β', 'γ', 'δ'], SUB = ['₁', '₂'];
 const nm = (k, i) => NM[i] + SUB[k];
 const key = (k, i) => k + ',' + i;
@@ -221,11 +221,6 @@ function q8Tap(w, p) {
   const kk = key(k, x < a ? 0 : x < 180 ? 1 : x < 180 + a ? 2 : 3);
   if (kk !== q8.given) q8.shown[kk] = !q8.shown[kk];
 }
-// Erste Aufgabe ist nicht parallel, danach zufällig.
-function newPq(first) {
-  const old = pq; let n; do n = 10 * rnd(5, 13); while (n === 90 || (old && old.a === n));
-  pq = { a: n, d: first === true ? 10 : pick([-10, 0, 10]), show: false }; a = n; tlt = pq.d;
-}
 
 const WP = [[0, 0, 1, 2], [0, 1, 1, 3], [0, 2, 1, 0], [0, 3, 1, 1]];
 const WW = [`${kg('c1', 'α₁')} = ${kg('c1', 'α₂')} &nbsp;&nbsp; Stufenwinkel`, `${kg('c1', 'α₂')} = ${kg('c3', 'γ₂')} &nbsp;&nbsp; Scheitelwinkel`, `Also: ${kg('c1', 'α₁')} = ${kg('c3', 'γ₂')}`];
@@ -265,11 +260,8 @@ const STEPS = [
     txt: () => shown ? 'Wechselwinkel liegen auf verschiedenen Seiten von f und an verschiedenen Parallelen. Bei parallelen Geraden sind sie gleich groß.' : '',
     eq: () => { const [k1, i1, k2, i2] = WP[pair % 4]; return shown ? `${kg('c1', nm(k1, i1))} = ${kg('c3', nm(k2, i2))} = ${kz('c1', v(k1, i1))}` : ''; } },
   whyW(1), whyW(2), whyW(3),
-  // Aufgaben
+  // Aufgabe
   { t: 'Aufgabe: Ein Winkel reicht für alle acht', enter: newQ8, tap: q8Tap, btns: [{ l: 'Neue Aufgabe', f: newQ8 }], fig: q8Fig },
-  { t: 'Aufgabe: Parallel oder nicht?', enter: () => newPq(true), each: m => { const { show, d } = pq; pq.show = true; pq.d = 2; m(); pq.d = 0; m(); Object.assign(pq, { show, d }); }, btns: [{ l: 'Auflösen', f: () => { pq.show = !pq.show; } }, { l: 'Neue Aufgabe', f: newPq }],
-    fig: () => par({ col: { '0,0': 'c1', '1,0': 'c1' }, names: 1, vals: 1, only: ['0,0', '1,0'], noPar: 1 }), txt: 'Sind g und h parallel?',
-    eq: () => !pq.show ? '' : pq.d ? `${kg('c1', 'α₁')} = ${kz('c1', v(0, 0))}, ${kg('c1', 'α₂')} = ${kz('c1', v(1, 0))}. Verschieden, also nicht parallel!` : `${kg('c1', 'α₁')} = ${kg('c1', 'α₂')} = ${kz('c1', v(0, 0))}. Gleich, also parallel!` }
 ];
 
 // ---------- Ablauf ----------
