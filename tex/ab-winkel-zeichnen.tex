@@ -1,0 +1,173 @@
+% Nachbau zweier Arbeitsblätter: Vorderseite Winkelmessung, Rückseite Winkel mit vorgegebenem Winkelmaß zeichnen.
+% Kompilieren mit xelatex. Schrift Andika liegt im Ordner fonts.
+\documentclass{article}
+\usepackage[a4paper, margin=0cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Andika}[Path=fonts/, Extension=.ttf, UprightFont=*-Regular, BoldFont=*-Bold]
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\definecolor{blau}{HTML}{2D4B7C}
+\definecolor{rand}{HTML}{8C9AB5}
+\definecolor{rot}{HTML}{C0392B}
+\definecolor{feldgrau}{HTML}{C9CCD2}
+\definecolor{gelb}{HTML}{F2C037}
+\definecolor{geo}{HTML}{E9EFF5}
+\definecolor{gruen}{HTML}{C9DFA8}
+\definecolor{stiftblau}{HTML}{2F67B1}
+\definecolor{stiftgruen}{HTML}{2E8B57}
+\definecolor{holz}{HTML}{EBCB9C}
+\tikzset{
+  strich/.style={line width=1.05pt, line cap=round},
+  punkt/.style={rot},
+  nrbox/.style={draw, line width=0.5pt, minimum size=0.36cm, inner sep=0, font=\fontsize{8.5}{9}\selectfont\bfseries},
+  % Geodreieck wie auf der Vorlage: Gradskala entlang der kurzen Seiten, gelber runder Skalenring innen, Griff, Hilfslinien
+  pics/geodreieck/.style={code={
+    \fill[geo, fill opacity=0.85] (-8,0) -- (8,0) -- (0,8) -- cycle;
+    \foreach \h in {0.9,1.4,...,3.9} {\pgfmathsetmacro\w{sqrt(max(3.95*3.95-\h*\h,0))} \draw[black!40, line width=0.2pt] (-\w,\h) -- (\w,\h);}
+    \draw[black!40, line width=0.25pt] (0,0) -- (0,3.95) (0,0) -- (45:3.95) (0,0) -- (135:3.95);
+    \fill[gelb] (4.75,0) arc (0:180:4.75) -- (-3.95,0) arc (180:0:3.95) -- cycle;
+    \draw[black!55, line width=0.25pt] (4.75,0) arc (0:180:4.75) (3.95,0) arc (0:180:3.95);
+    \foreach \t in {1,...,179} {\pgfmathsetmacro\l{mod(\t,10)==0 ? 0.3 : (mod(\t,5)==0 ? 0.2 : 0.12)} \draw[line width=0.15pt] (\t:4.75) -- (\t:{4.75-\l});}
+    \foreach \k in {10,20,...,170} {\pgfmathtruncatemacro\m{180-\k} \pgfmathsetmacro\r{\k-90} \node[font=\fontsize{3.8}{4}\selectfont, inner sep=0, rotate=\r] at (\k:4.2) {\m};}
+    \fill[black!82, rounded corners=0.3] (-1.9,1.2) rectangle (1.9,1.8);
+    \foreach \t in {3,...,177} {\pgfmathsetmacro\l{mod(\t,10)==0 ? 0.55 : (mod(\t,5)==0 ? 0.38 : 0.22)}
+      \pgfmathsetmacro\ra{(8-0.12*1.4142)/(abs(cos(\t))+sin(\t))} \pgfmathsetmacro\rb{(8-(0.12+\l)*1.4142)/(abs(cos(\t))+sin(\t))}
+      \draw[line width=0.15pt] (\t:\ra) -- (\t:\rb);}
+    \foreach \k in {10,20,...,170} {\pgfmathsetmacro\r{(8-1.05*1.4142)/(abs(cos(\k))+sin(\k))} \pgfmathsetmacro\w{\k-90} \node[font=\fontsize{4.2}{4.5}\selectfont, inner sep=0, rotate=\w] at (\k:\r) {\k};}
+    \foreach \i in {-75,...,75} {\pgfmathsetmacro\l{mod(\i,10)==0 ? 0.36 : (mod(\i,5)==0 ? 0.25 : 0.15)} \draw[line width=0.15pt] (\i/10,0) -- (\i/10,\l);}
+    \foreach \i in {-7,...,7} {\pgfmathtruncatemacro\n{abs(\i)} \node[font=\fontsize{4}{4.5}\selectfont, inner sep=0] at (\i,0.55) {\n};}
+    \draw[black!60, line width=0.5pt] (-8,0) -- (8,0) -- (0,8) -- cycle;
+  }},
+  % kleines Hilfsgeodreieck wie in Aufgabe 1
+  pics/geohint/.style={code={
+    \draw[gelb!70, line width=1.4pt] (4.3,0) arc (0:180:4.3);
+    \draw[black!45, line width=0.35pt] (-8,0) -- (8,0) -- (0,8) -- cycle; \draw[black!45, line width=0.35pt] (0,0) -- (0,8);
+  }}
+}
+% Antwortfeld
+\newcommand{\feld}[1]{\fill[feldgrau, rounded corners=1.5pt] ($#1+(-0.6,-0.3)$) rectangle ($#1+(0.6,0.3)$);}
+% Stift: Spitze, Richtung zum Ende, Farbe, Länge, Breite (cm)
+\newcommand{\stift}[5]{\begin{scope}[shift={#1}, rotate=#2]
+  \fill[#3] (0.55,-#5/2) rectangle (#4,#5/2);
+  \fill[#3!70!black] (0.55,-#5/2) rectangle (#4,-#5/6);
+  \fill[holz] (0,0) -- (0.55,-#5/2) -- (0.55,#5/2) -- cycle;
+  \fill[#3!60!black] (0,0) -- (0.18,-#5/6) -- (0.18,#5/6) -- cycle;
+  \draw[black!70, line width=0.3pt] (0,0) -- (0.55,-#5/2) -- (#4,-#5/2) -- (#4,#5/2) -- (0.55,#5/2) -- cycle;
+\end{scope}}
+\begin{document}
+\fontsize{10.9}{13}\selectfont
+\null
+\begin{tikzpicture}[remember picture, overlay, shift={(current page.north west)}]
+\draw[rand, line width=1.1pt] (1.2,-0.6) -- (1.2,-29.1);
+\draw[blau, line width=0.5pt] (1.2,-2.2) -- (20.4,-2.2);
+\draw[blau, line width=0.5pt] (1.2,-27.6) -- (20.4,-27.6);
+\node[anchor=west, inner sep=0] at (2.34,-1.85) {Winkelmessung};
+\node[anchor=west, inner sep=0, text=black!75] at (2.45,-28.35) {46}; \node[anchor=west, inner sep=0, text=black!75] at (3.75,-28.35) {sechsundvierzig};
+\node[anchor=west, inner sep=0] at (3.12,-2.95) {So heißen die Teile};
+\node[anchor=west, inner sep=0] at (3.09,-3.51) {eines Winkels:};
+\draw[strich] (6.94,-6.75) -- (3.12,-6.75) -- (6.77,-4.02);
+\node[anchor=west, inner sep=0] at (5.48,-6.21) {Schenkel};
+\node[anchor=west, inner sep=0] at (3.82,-7.48) {Scheitel};
+\draw[-stealth, line width=0.55pt] (5.43,-6.01) -- (5.31,-6.01) .. controls (5.11,-6.01) and (5.03,-5.91) .. (5.01,-5.61);
+\draw[-stealth, line width=0.55pt] (5.43,-6.09) -- (5.31,-6.09) .. controls (5.11,-6.09) and (5.03,-6.19) .. (5.01,-6.51);
+\draw[-stealth, line width=0.55pt] (3.77,-7.38) -- (3.27,-7.38) .. controls (3.02,-7.38) .. (3.02,-6.90);
+\begin{scope}[shift={(13.44,-8.16)}, x=0.642cm, y=0.642cm]
+\pic {geodreieck};
+\draw[strich] (0,0) -- (9.18,0); \draw[strich] (0,0) -- (40:8.29);
+\fill[punkt] (0,0) circle (0.07);
+\end{scope}
+\begin{scope}[shift={(13.44,-8.16)}, x=0.642cm, y=0.642cm]\draw[line width=0.6pt, black!80] (40:5.25) circle (0.68); \node[anchor=west, inner sep=0] at ($(40:5.25)+(0.95,0.1)$) {3.};\end{scope}
+\node[inner sep=0, text=rot] at (13.53,-8.55) {1.};
+\node[inner sep=0, text=blau] at (16.90,-8.59) {2.};
+\node[anchor=west, inner sep=0] at (3.12,-8.78) {So misst man einen Winkel:};
+\node[anchor=west, inner sep=0, text=blau] at (3.15,-9.28) {\textcolor{rot}{1.}};
+\node[anchor=west, inner sep=0] at (3.77,-9.30) {Lege den Nullpunkt des Geodreiecks auf den Scheitel des Winkels.};
+\node[anchor=west, inner sep=0, text=blau] at (3.15,-9.84) {2.};
+\node[anchor=west, inner sep=0] at (3.77,-9.86) {Drehe das Geodreieck, bis seine Kante auf dem Schenkel des Winkels liegt};
+\node[anchor=west, inner sep=0] at (3.77,-10.35) {und dabei der andere Schenkel unter dem Geodreieck ist.};
+\node[anchor=west, inner sep=0, text=blau] at (3.15,-10.86) {3.};
+\node[anchor=west, inner sep=0] at (3.77,-10.88) {Lies die Winkelskala des Geodreiecks dort ab, wo der andere Schenkel sie schneidet.};
+\node[anchor=west, inner sep=0] at (3.77,-11.32) {Nimm die Skala, die beim ersten Schenkel bei 0 beginnt.};
+\node[nrbox] at (2.55,-12.71) {1};
+\node[anchor=west, inner sep=0] at (3.12,-12.71) {Miss und notiere die spitzen Winkel. Spitze Winkel sind kleiner als 90°.};
+\draw[strich] (8.13,-16.05) -- (3.12,-16.05) -- (7.50,-13.56);
+\feld{(5.68,-15.50)}
+\fill[punkt] (3.12,-16.05) circle (0.045);
+\draw[strich] (10.07,-18.24) -- (5.05,-18.24) -- (9.92,-16.95);
+\feld{(8.81,-17.78)}
+\fill[punkt] (5.05,-18.24) circle (0.045);
+\draw[strich] (8.37,-14.62) -- (13.38,-14.06) -- (12.22,-18.97);
+\feld{(12.29,-14.74)}
+\fill[punkt] (13.38,-14.06) circle (0.045);
+\draw[strich] (14.59,-13.24) -- (19.30,-14.95) -- (17.28,-19.46);
+\feld{(18.31,-15.18)}
+\fill[punkt] (19.30,-14.95) circle (0.045);
+\node[nrbox] at (2.60,-20.27) {2};
+\node[anchor=west, inner sep=0] at (3.17,-20.27) {Miss und notiere die stumpfen Winkel. Stumpfe Winkel sind größer als 90°};
+\node[anchor=west, inner sep=0] at (3.17,-20.75) {und kleiner als 180°.};
+\draw[strich] (3.16,-21.51) -- (7.62,-23.83) -- (12.08,-21.47);
+\feld{(7.59,-22.92)}
+\fill[punkt] (7.62,-23.83) circle (0.045);
+\draw[strich] (11.63,-24.44) -- (15.70,-21.42) -- (19.29,-24.88);
+\feld{(15.61,-22.43)}
+\fill[punkt] (15.70,-21.42) circle (0.045);
+\draw[strich] (5.19,-26.38) -- (10.18,-26.82) -- (15.06,-25.48);
+\feld{(9.88,-26.05)}
+\fill[punkt] (10.18,-26.82) circle (0.045);
+\end{tikzpicture}
+\newpage
+\null
+\begin{tikzpicture}[remember picture, overlay, shift={(current page.north west)}]
+\draw[rand, line width=0.7pt] (19.8,-0.6) -- (19.8,-29.1); \draw[rand, line width=0.7pt] (20.05,-0.6) -- (20.05,-29.1);
+\draw[blau, line width=0.5pt] (0.6,-2.2) -- (19.8,-2.2);
+\draw[blau, line width=0.5pt] (0.6,-27.6) -- (19.8,-27.6);
+\node[anchor=west, inner sep=0] at (1.68,-1.78) {Winkel mit vorgegebenem Winkelmaß zeichnen};
+\node[anchor=east, inner sep=0, text=black!75] at (17.3,-28.35) {einundzwanzig}; \node[anchor=east, inner sep=0, text=black!75] at (18.6,-28.35) {21};
+\node[anchor=west, inner sep=0] at (1.68,-2.83) {So zeichnest du einen Winkel, der eine bestimmte Größe hat. Hier sind es \textbf{30°}.};
+\draw[strich] (1.62,-7.12) -- (9.15,-7.12);
+\begin{scope}[shift={(4.42,-7.12)}, x=0.355cm, y=0.355cm]
+\pic {geodreieck};
+\fill[punkt] (0,0) circle (0.12);
+\stift{(30:6.2)}{98}{stiftblau}{6.3}{0.85}
+\end{scope}
+\draw[strich] (12.27,-7.14) -- (17.02,-7.14);
+\begin{scope}[shift={(13.15,-6.62)}, rotate=29.4, x=0.222cm, y=0.222cm]
+\pic[transform shape] {geodreieck};
+\end{scope}
+\draw[strich] (12.27,-7.14) -- (13.96,-6.23);
+\fill[punkt] (12.27,-7.14) circle (0.05);
+\stift{(13.96,-6.23)}{-15.8}{stiftgruen}{2.13}{0.3}
+\node[anchor=west, inner sep=0, text=blau] at (1.65,-7.87) {\textcolor{rot}{1.}};
+\node[anchor=west, inner sep=0] at (2.15,-7.88) {Lege das Geodreieck mit der Null an};
+\node[anchor=west, inner sep=0] at (2.15,-8.40) {den Punkt, wo der Winkel entstehen soll.};
+\node[anchor=west, inner sep=0] at (2.15,-8.90) {Die Kante muss auf der Linie liegen.};
+\node[anchor=west, inner sep=0, text=blau] at (1.65,-9.85) {2.};
+\node[anchor=west, inner sep=0] at (2.15,-9.87) {Markiere die Stelle, an der \textbf{30} auf der};
+\node[anchor=west, inner sep=0] at (2.15,-10.32) {Skala steht.};
+\node[anchor=west, inner sep=0, text=blau] at (10.60,-7.95) {3.};
+\node[anchor=west, inner sep=0] at (11.10,-7.96) {Verbinde den Punkt mit der Markierung.};
+\node[anchor=west, inner sep=0] at (11.10,-8.43) {Du darfst über die Markierung hinaus};
+\node[anchor=west, inner sep=0] at (11.10,-8.97) {verlängern.};
+\node[nrbox] at (1.75,-11.66) {1};
+\node[anchor=west, inner sep=0] at (2.30,-11.66) {Zeichne Winkel mit den vorgegebenen Winkelmaßen.};
+\begin{scope}[shift={(3.55,-15.43)}, rotate=-24.3, x=0.161cm, y=0.161cm]\pic[transform shape] {geohint};\end{scope}
+\draw[strich] (3.55,-15.43) -- (9.35,-17.97);
+\fill[punkt] (3.55,-15.43) circle (0.045);
+\begin{scope}[shift={(16.15,-16.35)}, rotate=140.2, x=0.161cm, y=0.161cm]\pic[transform shape] {geohint};\end{scope}
+\draw[strich] (16.15,-16.35) -- (11.37,-12.25);
+\fill[punkt] (16.15,-16.35) circle (0.045);
+\node[inner sep=0] at (3.68,-16.08) {40°};
+\node[inner sep=0] at (16.33,-15.90) {20°};
+\node[nrbox] at (1.75,-19.38) {2};
+\node[anchor=west, inner sep=0] at (2.30,-19.38) {Zeichne Winkel mit den angegebenen Winkelmaßen.};
+\node[anchor=west, inner sep=0] at (2.30,-19.89) {Überlege zuerst, wie du das Geodreieck anlegen musst.};
+\draw[strich] (2.36,-20.47) -- (8.20,-23.02);
+\fill[punkt] (2.36,-20.47) circle (0.045);
+\node[inner sep=0] at (2.51,-21.09) {10°};
+\draw[strich] (14.78,-20.28) -- (10.38,-23.04);
+\fill[punkt] (14.78,-20.28) circle (0.045);
+\node[inner sep=0] at (14.18,-20.25) {100°};
+\end{tikzpicture}
+\end{document}
