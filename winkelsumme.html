@@ -243,17 +243,16 @@ function newQq() {
 }
 function taskFig(t) {
   const ps = t.ps, k = ps.length; let s = '';
-  ps.forEach((v, i) => { const hid = i === t.u && t.s < 3; s += inner(v, ps[(i + k - 1) % k], ps[(i + 1) % k], 58, hid ? 'n' : CL[i]); });
+  ps.forEach((v, i) => { const hid = i === t.u && !t.s; s += inner(v, ps[(i + k - 1) % k], ps[(i + 1) % k], 58, hid ? 'n' : CL[i]); });
   s += poly(ps);
-  ps.forEach((v, i) => { const hid = i === t.u && t.s < 3; s += outLab(v, ps[(i + k - 1) % k], ps[(i + 1) % k], `${GR[i]} = ${hid ? '?' : t.v[i] + '°'}`); });
+  ps.forEach((v, i) => { const hid = i === t.u && !t.s; s += outLab(v, ps[(i + k - 1) % k], ps[(i + 1) % k], `${GR[i]} = ${hid ? '?' : t.v[i] + '°'}`); });
   return s;
 }
+// Auflösen zeigt nur das Ergebnis mit der einen Rechnung, die Rechenschritte werden nicht einzeln abgefragt.
 function taskEq(t, sum) {
   if (!t.s) return '';
-  const k = t.v.length, u = G(t.u), o = [...Array(k).keys()].filter(i => i !== t.u);
-  return lines([`${[...Array(k).keys()].map(G).join(' + ')} = ${sum}° &nbsp;&nbsp;| ${o.map(i => '− ' + G(i)).join(' ')}`,
-    `${u} = ${sum}° ${o.map(i => '− ' + G(i)).join(' ')}`,
-    `${u} = ${sum}° ${o.map(i => '− ' + kz(CL[i], t.v[i])).join(' ')} = ${kz(CL[t.u], t.v[t.u])}`], t.s);
+  const o = [...Array(t.v.length).keys()].filter(i => i !== t.u);
+  return lines([`${G(t.u)} = ${sum}° ${o.map(i => '− ' + kz(CL[i], t.v[i])).join(' ')} = ${kz(CL[t.u], t.v[t.u])}`], 1);
 }
 
 const TD = { down: triDown, drag: triDrag };
@@ -283,11 +282,11 @@ const STEPS = [
     txt: 'Die Diagonale teilt das Viereck in zwei Dreiecke.', eq: () => '2 · 180° = 360°' },
   // Aufgaben
   { t: 'Aufgabe: Der fehlende Winkel im Dreieck', enter: newTq, fig: () => taskFig(tq),
-    btns: [{ l: 'Auflösen', f: () => { tq.s = (tq.s + 1) % 4; } }, { l: 'Neue Aufgabe', f: newTq }], eq: () => taskEq(tq, 180),
-    each: m => { const s = tq.s; tq.s = 3; m(); tq.s = s; } },
+    btns: [{ l: 'Auflösen', f: () => { tq.s = tq.s ? 0 : 1; } }, { l: 'Neue Aufgabe', f: newTq }], eq: () => taskEq(tq, 180),
+    each: m => { const s = tq.s; tq.s = 1; m(); tq.s = s; } },
   { t: 'Aufgabe: Der fehlende Winkel im Viereck', enter: newQq, fig: () => taskFig(qq),
-    btns: [{ l: 'Auflösen', f: () => { qq.s = (qq.s + 1) % 4; } }, { l: 'Neue Aufgabe', f: newQq }], eq: () => taskEq(qq, 360),
-    each: m => { const s = qq.s; qq.s = 3; m(); qq.s = s; } }
+    btns: [{ l: 'Auflösen', f: () => { qq.s = qq.s ? 0 : 1; } }, { l: 'Neue Aufgabe', f: newQq }], eq: () => taskEq(qq, 360),
+    each: m => { const s = qq.s; qq.s = 1; m(); qq.s = s; } }
 ];
 
 // ---------- Ablauf ----------
