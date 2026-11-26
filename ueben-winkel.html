@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mathe 8">
 <meta name="theme-color" content="#0f766e">
-<title>Üben: Winkel an Geraden und Parallelen</title>
+<title>Winkel an Geraden und Parallelen üben</title>
 <style>
 :root{--bg:#fbfaf6;--fg:#161a22;--mut:#9aa0ad;--line:#d9d7cf;--c1:#2563eb;--c2:#f08a00;--c3:#12a150;--btn:#fff}
 @media (prefers-color-scheme:dark){:root{--bg:#12151b;--fg:#f0f2f6;--mut:#7d8596;--line:#343b48;--c1:#5b9bff;--c2:#ffad33;--c3:#3ddc84;--btn:#1f242d}}
@@ -313,17 +313,17 @@ const onGo = () => { last = null; T0 = STEPS[step].timer || 300; tReset(); };
 const zeit = (t, sek) => ({ t, solo: 1, timer: sek, btns: [TBTN], fig: () => '' });
 
 const STEPS = [
-  quizStep('1. Quiz: ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile 1. Quiz ein.'),
-  zeit('Arbeitszeit: Aufgabe 1 bis 3', 900),
-  wStep('Besprechung: Aufgabe 1', 50, 0, 0, true),
-  wStep('Besprechung: Aufgabe 2', 50, 0, 1, false),
-  zeit('Arbeitszeit: Aufgabe 4 bis 6', 900),
-  { t: 'Besprechung: Aufgabe 4', rv: 2, tap: paarTap, each: m => m({ txt: 'a) ' + SATZ.Wechselwinkel }), enter: () => { CF = { w: 50, gk: -1, gi: -1, one: false }; }, btns: [{ l: 'Nächstes Paar', f: paarNeu }],
+  quizStep('1. Quiz', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile 1. Quiz ein.'),
+  zeit('Aufgabe 1 bis 3', 900),
+  wStep('Lösung Aufgabe 1', 50, 0, 0, true),
+  wStep('Lösung Aufgabe 2', 50, 0, 1, false),
+  zeit('Aufgabe 4 bis 6', 900),
+  { t: 'Lösung Aufgabe 4', rv: 2, tap: paarTap, each: m => m({ txt: 'a) ' + SATZ.Wechselwinkel }), enter: () => { CF = { w: 50, gk: -1, gi: -1, one: false }; }, btns: [{ l: 'Nächstes Paar', f: paarNeu }],
     fig: paarFig, eq: paarEq, txt: paarTxt },
-  wStep('Besprechung: Aufgabe 5', 110, 1, 2, false),
-  { t: 'Besprechung: Aufgabe 6', rv: 1, parts: ['q0', 'q1'], hit: hit6, enter: () => { quiz = SET6; },
+  wStep('Lösung Aufgabe 5', 110, 1, 2, false),
+  { t: 'Lösung Aufgabe 6', rv: 1, parts: ['q0', 'q1'], hit: hit6, enter: () => { quiz = SET6; },
     fig: () => `<g transform="translate(${f(X6)} ${f(Y6)}) scale(${Z6})">${cellFig(0, 1) + cellFig(1, 1)}</g>` },
-  quizStep('2. Quiz: ohne Hilfen', SETB, 'Trag deine Ergebnisse in die Zeile 2. Quiz ein. Wie viele sind richtig?'),
+  quizStep('2. Quiz', SETB, 'Trag deine Ergebnisse in die Zeile 2. Quiz ein. Wie viele sind richtig?'),
 ];
 
 // ---------- Ablauf ----------
