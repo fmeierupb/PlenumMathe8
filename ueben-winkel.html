@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mathe 8">
+<meta name="theme-color" content="#0f766e">
+<title>Üben: Winkel an Geraden und Parallelen</title>
+<style>
+:root{--bg:#fbfaf6;--fg:#161a22;--mut:#9aa0ad;--line:#d9d7cf;--c1:#2563eb;--c2:#f08a00;--c3:#12a150;--btn:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#12151b;--fg:#f0f2f6;--mut:#7d8596;--line:#343b48;--c1:#5b9bff;--c2:#ffad33;--c3:#3ddc84;--btn:#1f242d}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{display:flex;flex-direction:column;height:100dvh;padding:12px 16px calc(12px + env(safe-area-inset-bottom));user-select:none;-webkit-user-select:none}
+h1{margin:0;font-size:clamp(26px,4.2vw,52px);line-height:1.15;min-height:1.2em}
+#fig{flex:1;min-height:0;width:100%;touch-action:none}
+#txt{font-size:clamp(18px,2.6vw,32px);min-height:1.4em;text-align:center}
+#eq{font-size:clamp(22px,3.6vw,44px);font-weight:700;min-height:1.4em;text-align:center;font-variant-numeric:tabular-nums;line-height:1.35}
+#eq .dim{opacity:.4;font-size:.8em}
+#eq .k.c1{color:var(--c1)}#eq .k.c2{color:var(--c2)}#eq .k.c3{color:var(--c3)}#eq .k.cr{color:#d81e1e}#eq .k.n{color:var(--mut)}
+footer{display:flex;gap:10px;align-items:center;margin-top:10px}
+#extras{display:flex;gap:10px;margin:0 auto}
+button{font:inherit;font-size:clamp(16px,2vw,24px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.3}
+#menu{font:inherit;font-size:clamp(16px,2vw,24px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;text-decoration:none}
+#fs svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.15em}
+#fs .fo,html.fs #fs .fi{display:none}
+html.fs #fs .fo{display:inline}
+#cnt{color:var(--mut);font-size:clamp(14px,1.6vw,20px);min-width:3.5em;text-align:center}
+#next{background:var(--c1);border-color:var(--c1);color:#fff;font-weight:700}
+footer{flex-wrap:wrap;row-gap:8px}
+#extras{flex-wrap:wrap;justify-content:center}
+#extras:empty{display:none}
+/* Handy hochkant: Zusatzknöpfe in eine eigene Zeile, Zurück nur als Pfeil. Was trotzdem nicht passt, bricht um, statt aus dem Bild zu rutschen. */
+@media (max-width:700px){#extras{order:9;flex-basis:100%;margin:0}#next{margin-left:auto}footer{gap:8px}button,#menu{padding:10px 12px}#cnt{min-width:0}}
+@media (max-width:420px){#prev .lbl{display:none}}
+svg .ln{stroke:var(--fg);stroke-width:5;stroke-linecap:round;fill:none}
+svg .thin{stroke:var(--fg);stroke-width:3;stroke-linecap:round;fill:none}
+svg .da{stroke:var(--mut);stroke-width:3;stroke-dasharray:12 9;fill:none}
+svg .hi{stroke:var(--c3);stroke-width:5;stroke-linecap:round;fill:none}
+svg .zk{stroke:var(--c2);stroke-width:3;stroke-dasharray:10 8;fill:none}
+svg .wd{stroke:none}
+svg .n{fill:var(--mut);opacity:.3}
+svg .c1{fill:var(--c1);opacity:.62}
+svg .c2{fill:var(--c2);opacity:.62}
+svg .c3{fill:var(--c3);opacity:.62}
+svg .cr{fill:#d81e1e;opacity:.62}
+svg .tx{fill:var(--fg);font:700 30px system-ui,sans-serif}
+svg .ts{fill:var(--mut);font:600 24px system-ui,sans-serif}
+svg .tr{fill:#d81e1e}
+svg .tc1{fill:var(--c1)}
+svg .tc3{fill:var(--c3)}
+svg .pt{fill:var(--fg)}
+svg .mk{fill:var(--c3)}
+svg .hd{fill:var(--c1);opacity:.28}
+svg .ip{fill:var(--c2)}
+svg .asph{fill:#5d626b}
+svg .curb{fill:#c9c6bd}
+svg .strp{stroke:#fff;stroke-width:9}
+svg .strd{stroke:#fff;stroke-width:6;stroke-dasharray:18 12;opacity:.85}
+svg .tk{fill:#fff;font:700 30px system-ui,sans-serif}
+svg .cell{fill:none;stroke:var(--line);stroke-width:2}
+svg .rl{fill:var(--fg);font:600 19px system-ui,sans-serif}
+svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
+</style>
+</head>
+<body>
+<h1 id="title"></h1>
+<svg id="fig" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg"></svg>
+<div id="txt"></div>
+<div id="eq"></div>
+<footer>
+  <a id="menu" href="./">Menü</a><button id="fs" aria-label="Vollbild" title="Vollbild (F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fi" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="fo" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg></button><button id="prev" aria-label="Zurück">‹<span class="lbl"> Zurück</span></button><span id="cnt"></span>
+  <div id="extras"></div>
+  <button id="next">Weiter ›</button>
+</footer>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+const P = (x, y) => ({ x, y });
+const M = P(400, 260);
+// Winkel mathematisch: gegen den Uhrzeigersinn, 0° zeigt nach rechts.
+const pol = (r, w, c = M) => P(c.x + r * Math.cos(rad(w)), c.y - r * Math.sin(rad(w)));
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const dirOf = (c, p) => (deg(Math.atan2(-(p.y - c.y), p.x - c.x)) + 360) % 360;
+const f = n => n.toFixed(1);
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[rnd(0, a.length - 1)];
+// Gradzahl in der Farbe ihres Winkelbogens (Klasse wie beim wedge)
+const kz = (c, v) => `<span class="k ${c}">${v}°</span>`;
+// Winkelname in der Farbe seines Bogens
+const kg = (c, s) => `<span class="k ${c}">${s}</span>`;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lines = (arr, n = arr.length) => arr.slice(0, n).map((l, i) => `<div class="${i < n - 1 ? 'dim' : ''}">${l}</div>`).join('');
+const text = (p, s, c = 'tx') => `<text class="${c}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="middle" dominant-baseline="central">${s}</text>`;
+const seg = (p, q, c = 'ln') => `<line class="${c}" x1="${f(p.x)}" y1="${f(p.y)}" x2="${f(q.x)}" y2="${f(q.y)}"/>`;
+const dot = (p, r = 8, c = 'pt') => `<circle class="${c}" cx="${f(p.x)}" cy="${f(p.y)}" r="${r}"/>`;
+const circ = (m, r, c = 'thin') => `<circle class="${c}" cx="${f(m.x)}" cy="${f(m.y)}" r="${f(r)}"/>`;
+const handle = p => `<circle class="hd" cx="${f(p.x)}" cy="${f(p.y)}" r="22"/>` + dot(p, 8);
+const poly = (ps, c = 'ln') => `<polygon class="${c}" points="${ps.map(p => f(p.x) + ',' + f(p.y)).join(' ')}"/>`;
+// Gerade durch p mit Richtung w, über das Bild hinaus verlängert.
+const xline = (p, w, c = 'ln') => seg(pol(900, w, p), pol(900, w + 180, p), c);
+// Winkelfläche gegen den Uhrzeigersinn von a1 nach a2, Beschriftung außerhalb des Bogens.
+function wedge(c, a1, a2, r, cls, label, tcls = 'tx', cap = 250) {
+  let d = ((a2 - a1) % 360 + 360) % 360; if (d === 0 && a2 !== a1) d = 360; if (d <= 0) return '';
+  const p1 = pol(r, a1, c), p2 = pol(r, a1 + d, c);
+  let s = d >= 360 ? `<circle class="wd ${cls}" cx="${f(c.x)}" cy="${f(c.y)}" r="${r}"/>`
+    : `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 ${d > 180 ? 1 : 0} 0 ${f(p2.x)} ${f(p2.y)}Z"/>`;
+  if (label) {
+    const half = String(label).length * 8.5 + 8;
+    const lr = Math.min(cap, Math.max(r + 40, half / Math.tan(rad(Math.min(d, 178) / 2))));
+    s += text(pol(lr, a1 + d / 2, c), label, tcls);
+  }
+  return s;
+}
+// Innenwinkel an Ecke v zwischen den Strahlen zu p und q (kleinerer Winkel).
+function inner(v, p, q, r, cls, label, tcls, cap) {
+  let a1 = dirOf(v, p), a2 = dirOf(v, q);
+  if (((a2 - a1) % 360 + 360) % 360 > 180) [a1, a2] = [a2, a1];
+  return wedge(v, a1, a2, r, cls, label, tcls, cap);
+}
+const angleAt = (v, p, q) => { const d = Math.abs(dirOf(v, p) - dirOf(v, q)); return d > 180 ? 360 - d : d; };
+const cm = px => (Math.round(px / 5) / 10).toFixed(1).replace('.', ',');
+// Beschriftung eines Innenwinkels außen an der Ecke v, damit sie auch bei spitzen Winkeln lesbar bleibt.
+function outLab(v, p, q, s, cls = 'tx') {
+  const a1 = dirOf(v, p), a2 = dirOf(v, q), d = ((a2 - a1) % 360 + 360) % 360;
+  const w = (d <= 180 ? a1 + d / 2 : a2 + (360 - d) / 2) + 180, ux = Math.cos(rad(w)), uy = Math.sin(rad(w)), hw = 8.5 * String(s).length;
+  const pt = pol(26 + hw * Math.abs(ux) + 16 * Math.abs(uy), w, v);
+  return text(P(clamp(pt.x, hw + 6, 794 - hw), clamp(pt.y, 18, 502)), s, cls);
+}
+
+// ---------- Sechs kurze Aufgaben: Start und Schluss ----------
+// Drei Spalten, zwei Zeilen. Jede Zelle zeigt einen gegebenen Winkel und ein Fragezeichen. Antippen deckt Ergebnis und Regel auf.
+const CW = 800 / 3, CH = 260, QK = ['q0', 'q1', 'q2', 'q3', 'q4', 'q5'];
+const RUL = { S: 'Scheitelwinkel', N: 'Nebenwinkel', T: 'Stufenwinkel', W: 'Wechselwinkel', TN: 'Stufen, dann Neben' };
+// Art und gegebener Winkel. P: zwei Stufenwinkel, gefragt ist, ob die Geraden parallel sind.
+const SETA = [['S', 40], ['N', 40], ['T', 70], ['W', 70], ['TN', 60], ['P', 60, 70]];
+const SETB = [['S', 60], ['N', 130], ['T', 110], ['W', 100], ['TN', 120], ['P', 80, 80]];
+let quiz = SETA;
+// Glatte Zehner ohne 90°. An zwei Parallelen nur 60° bis 120°, sonst rutschen Beschriftungen aus der Zelle.
+const zehn = (lo, hi) => { let n; do n = 10 * rnd(lo, hi); while (n === 90); return n; };
+function newQuiz() {
+  const p = zehn(6, 12);
+  quiz = [['S', zehn(4, 14)], ['N', zehn(4, 14)], ['T', zehn(6, 12)], ['W', zehn(6, 12)], ['TN', zehn(6, 12)], ['P', p, pick([p, p, p - 10, p + 10])]];
+  opened = new Set(); shown = false; sub = 0;
+}
+// Kleine Winkelfläche mit Beschriftung dicht am Bogen.
+function wq(c, a1, a2, cls, label) {
+  const r = 26, d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), half = String(label).length * 8.5 + 12;
+  const lr = Math.max(r + 24, half / Math.tan(rad(d / 2)));
+  return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label);
+}
+function cellFig(i) {
+  const [ty, a, b2] = quiz[i], x0 = (i % 3) * CW, y0 = Math.floor(i / 3) * CH, c = P(x0 + CW / 2, y0 + 148), open = vis('q' + i);
+  let s = `<rect class="cell" x="${f(x0 + 4)}" y="${y0 + 4}" width="${f(CW - 8)}" height="${CH - 8}" rx="14"/>` + text(P(x0 + 24, y0 + 30), i + 1, 'ts');
+  // gegeben: blau. gefragt: grau mit Fragezeichen, aufgedeckt in der Farbe gleich großer Winkel.
+  const giv = (p, a1, a2) => wq(p, a1, a2, 'c1', (a2 - a1) + '°');
+  const ask = (p, a1, a2) => wq(p, a1, a2, open ? (a2 - a1 === a ? 'c1' : 'c2') : 'n', open ? (a2 - a1) + '°' : '?');
+  const hl = (p, u = 0) => seg(pol(108, u, p), pol(108, u + 180, p), 'thin');
+  let rule = open ? RUL[ty] : '';
+  if (ty === 'S' || ty === 'N') {
+    s += giv(c, 0, a) + (ty === 'S' ? ask(c, 180, a + 180) : ask(c, a, 180)) + hl(c) + seg(pol(100, a, c), pol(100, a + 180, c), 'thin');
+  } else {
+    const dx = 38 / Math.tan(rad(a)), T = P(c.x + dx, c.y - 38), B = P(c.x - dx, c.y + 38);
+    let u = 0;
+    s += giv(T, 0, a);
+    if (ty === 'T') s += ask(B, 0, a);
+    if (ty === 'W') s += ask(B, 180, a + 180);
+    if (ty === 'TN') s += ask(B, a, 180);
+    if (ty === 'P') { u = a - b2; s += wq(B, u, a, b2 === a ? 'c1' : 'c2', b2 + '°'); rule = open ? (b2 === a ? 'parallel' : 'nicht parallel') : 'parallel?'; }
+    // Die untere Gerade ist nur dann parallel gezeichnet, wenn die Stufenwinkel gleich sind.
+    s += hl(P(c.x, T.y)) + hl(P(c.x, B.y - (c.x - B.x) * Math.tan(rad(u))), u) + seg(pol(100, a, c), pol(100, a + 180, c), 'thin');
+  }
+  return s + `<text class="rl" x="${f(x0 + CW - 16)}" y="${y0 + 30}" text-anchor="end" dominant-baseline="central">${rule}</text>`;
+}
+const quizFig = () => QK.map((k, i) => cellFig(i)).join('');
+const quizHit = p => 'q' + (clamp(Math.floor(p.x / CW), 0, 2) + 3 * clamp(Math.floor(p.y / CH), 0, 1));
+const quizStep = (t, set, txt) => ({ t, rv: 1, parts: QK, hit: quizHit, enter: () => { quiz = set; }, btns: [{ l: 'Neue Aufgaben', f: newQuiz }], fig: quizFig, txt });
+
+// ---------- Parallelen g und h mit einer oder zwei schrägen Geraden ----------
+const GY = 130, HY = 390, NM = ['α', 'β', 'γ', 'δ'], SUB = ['₁', '₂', '₃', '₄'], LN = ['f', 'j'];
+// TS: schräge Geraden mit Schnittpunkt x auf g und Richtung w. last: zuletzt angetippter Winkel.
+let TS = [], last = null;
+const pts = T => [P(T.x, GY), P(T.x - (HY - GY) / Math.tan(rad(T.w)), HY)];
+const kk = (t, k, i) => t + ',' + k + ',' + i;
+// Kreuzungen sind durchnummeriert: f mit g ist 1, f mit h ist 2, j mit g ist 3, j mit h ist 4.
+const name = (t, k, i) => NM[i] + SUB[2 * t + k];
+const wert = (t, i) => i % 2 ? 180 - TS[t].w : TS[t].w;
+const farbe = i => i % 2 ? 'c2' : 'c1';
+const spans = w => [[0, w], [w, 180], [180, w + 180], [w + 180, 360]];
+// Alle Winkel außer dem gegebenen α der oberen Kreuzung
+const alle = n => { const a = []; for (let t = 0; t < n; t++) for (let k = 0; k < 2; k++) for (let i = 0; i < 4; i++) if (k || i) a.push(kk(t, k, i)); return a; };
+// Regel zu jedem Winkel: Name der Regel und der Winkel, auf den sie sich bezieht (Kreuzung, Stelle)
+const REGEL = { '0,1': ['Nebenwinkel zu', 0, 0], '0,2': ['Scheitelwinkel zu', 0, 0], '0,3': ['Nebenwinkel zu', 0, 0], '1,0': ['Stufenwinkel zu', 0, 0], '1,1': ['Stufenwinkel zu', 0, 1], '1,2': ['Wechselwinkel zu', 0, 0], '1,3': ['Stufenwinkel zu', 0, 3] };
+function parFig() {
+  let s = '';
+  TS.forEach((T, t) => pts(T).forEach((c, k) => spans(T.w).forEach((sp, i) => {
+    const key = kk(t, k, i), giv = !k && !i, on = giv || vis(key);
+    s += wedge(c, sp[0], sp[1], 54, on ? farbe(i) : 'n', giv ? `${name(t, k, i)} = ${wert(t, i)}°` : on ? wert(t, i) + '°' : name(t, k, i), 'tx', 150);
+  })));
+  s += seg(P(-100, GY), P(900, GY)) + seg(P(-100, HY), P(900, HY));
+  TS.forEach((T, t) => { const c = pts(T)[0]; s += xline(c, T.w) + text(P(c.x + (GY - 30) / Math.tan(rad(T.w)) - 28, 30), LN[t]); });
+  return s + text(P(770, GY - 26), 'g') + text(P(770, HY - 26), 'h') + text(P(60, 30), 'g ∥ h', 'ts');
+}
+function parHit(p) {
+  let best = null, bd = 150;
+  TS.forEach((T, t) => pts(T).forEach((c, k) => { const d = dist(p, c); if (d < bd) { bd = d; best = [t, k, c]; } }));
+  if (!best) return null;
+  const [t, k, c] = best, x = dirOf(c, p), w = TS[t].w, i = x < w ? 0 : x < 180 ? 1 : x < 180 + w ? 2 : 3;
+  if (!k && !i) return null;
+  return last = kk(t, k, i);
+}
+function regelEq() {
+  if (!last || !vis(last)) return '';
+  const [t, k, i] = last.split(',').map(Number), [r, k2, i2] = REGEL[k + ',' + i];
+  return `${kg(farbe(i), name(t, k, i))} = ${kz(farbe(i), wert(t, i))} &nbsp;&nbsp; ${r} ${kg(farbe(i2), name(t, k2, i2))}`;
+}
+// Eine schräge Gerade durch die Bildmitte
+const eine = w => { TS = [{ x: 400 + (260 - GY) / Math.tan(rad(w)), w }]; last = null; };
+function neu8() { let w; do w = zehn(5, 13); while (w === TS[0].w); eine(w); opened = new Set(); shown = false; sub = 0; }
+const onGo = () => { last = null; };
+
+const STEPS = [
+  quizStep('Start ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile Start ein.'),
+  { t: 'Ein Winkel reicht für alle acht', rv: 1, parts: alle(1), hit: parHit, enter: () => eine(70), btns: [{ l: 'Neue Aufgabe', f: neu8 }],
+    fig: parFig, eq: regelEq, each: m => m({ eq: 'α' }), txt: 'Wie groß ist der Winkel? Welche Regel hilft?' },
+  { t: 'Zwei Geraden schneiden die Parallelen', rv: 1, parts: alle(2), hit: parHit, enter: () => { TS = [{ x: 275, w: 60 }, { x: 585, w: 110 }]; last = null; },
+    fig: parFig, eq: regelEq, each: m => m({ eq: 'α' }), txt: 'Blatt, Aufgabe 4' },
+  quizStep('Schluss ohne Hilfen', SETB, 'Trag deine Ergebnisse in die Zeile Schluss ein. Wie viele sind richtig?'),
+];
+
+// ---------- Ablauf ----------
+// sub zählt bei Folien mit rv: n die schon aufgedeckten Schritte (1 bis n).
+let step = 0, pair = 0, shown = false, sub = 0, shownStep = -1;
+// Einzeln antippbare Lösungen: st.parts nennt die Teile, st.hit(p) liefert den getroffenen Teil.
+let opened = new Set();
+const vis = k => shown || opened.has(k);
+const done = (st = STEPS[step]) => (shown && sub >= (st.rv || 1)) || !!(st.parts && st.parts.every(k => opened.has(k)));
+function flip(k) {
+  if (shown) { shown = false; opened = new Set(STEPS[step].parts); }
+  if (opened.has(k)) opened.delete(k); else opened.add(k);
+}
+const txv = x => (typeof x === 'function' ? x() : x) || '';
+function put(st, o = {}) {
+  $('title').textContent = o.t ?? txv(st.t);
+  $('txt').textContent = o.txt ?? txv(st.txt);
+  $('eq').innerHTML = o.eq ?? (st.eq ? st.eq() : '');
+}
+// Überschrift, Text und Rechnung bekommen gleich beim Betreten der Folie den Platz ihres vollsten Zustands.
+// So bleibt die Zeichnung gleich groß, wenn unten Schritte dazukommen. st.each(m) misst weitere Zustände.
+const BOX = ['title', 'txt', 'eq'];
+// Folien mit gleichem grp (eine Herleitung über mehrere Folien) teilen sich den Platz des längsten Stands.
+function reserve(st) {
+  const keep = [shown, sub], hi = BOX.map(() => 0);
+  BOX.forEach(id => { $(id).style.minHeight = ''; });
+  const m = (o, g = st) => { put(g, o); BOX.forEach((id, i) => { hi[i] = Math.max(hi[i], $(id).offsetHeight); }); };
+  for (const g of st.grp ? STEPS.filter(s => s.grp === st.grp) : [st]) {
+    for (let i = 0; i <= (g.rv || 0); i++) { shown = i > 0; sub = i; m(undefined, g); }
+    [shown, sub] = keep;
+    if (g.each) g.each(o => m(o, g));
+  }
+  m();
+  BOX.forEach((id, i) => { $(id).style.minHeight = hi[i] + 'px'; });
+}
+// Was trotzdem größer wird, behält seinen Platz bis zur nächsten Folie.
+const grow = () => BOX.forEach(id => { const e = $(id), h = e.offsetHeight; if (h > parseFloat(e.style.minHeight || 0)) e.style.minHeight = h + 'px'; });
+function render() {
+  const st = STEPS[step];
+  if (shownStep !== step) reserve(st);
+  $('fig').innerHTML = st.fig();
+  put(st); grow();
+  if (shownStep !== step) {
+    shownStep = step;
+    $('extras').innerHTML = (st.btns || []).map((b, i) => `<button data-b="${i}">${b.l}</button>`).join('');
+    $('cnt').textContent = `${step + 1} / ${STEPS.length}`;
+  }
+  $('prev').disabled = step === 0 && !(shown && sub > 0);
+  $('next').disabled = step === STEPS.length - 1 && !(st.rv && !done(st));
+  const bs = $('extras').children || [];
+  for (let i = 0; i < bs.length; i++) bs[i].disabled = !!(st.btns[i].dis && st.btns[i].dis());
+}
+// end: beim Zurückgehen auf der vorigen Folie mit allen Schritten aufgedeckt landen.
+function go(d, end) {
+  const n = step + d; if (n < 0 || n >= STEPS.length) return;
+  step = n; pair = 0; shown = false; sub = 0; opened = new Set();
+  if (typeof onGo === 'function') onGo();
+  if (STEPS[step].enter) STEPS[step].enter();
+  if (end && STEPS[step].rv) { shown = true; sub = STEPS[step].rv; }
+  render();
+}
+// Zurück nimmt immer nur einen Schritt zurück. Erst am Anfang einer Folie geht es zur vorigen.
+const back = () => { if (STEPS[step].rv && shown && sub > 0) { sub--; shown = sub > 0; render(); } else go(-1, true); };
+$('prev').addEventListener('click', back);
+// Bei Folien mit verdecktem Ergebnis deckt jeder Druck einen Schritt auf, danach geht es weiter.
+const fwd = () => { const st = STEPS[step]; if (st.rv && !done(st)) { shown = true; sub = Math.min(st.rv, sub + 1); render(); } else go(1); };
+addEventListener('resize', () => { shownStep = -1; render(); });
+$('next').addEventListener('click', fwd);
+$('extras').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  STEPS[step].btns[+b.dataset.b].f(); render();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); fwd(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); back(); }
+});
+
+const fig = $('fig'); let down = false, pend = null;
+// Zeigerposition in Bildkoordinaten, auch wenn das Bild mit Rand eingepasst ist.
+function svgPt(e) {
+  const r = fig.getBoundingClientRect(), sc = Math.min(r.width / 800, r.height / 520);
+  return P((e.clientX - r.left - (r.width - 800 * sc) / 2) / sc, (e.clientY - r.top - (r.height - 520 * sc) / 2) / sc);
+}
+const ctr = st => typeof st.c === 'function' ? st.c() : st.c || M;
+fig.addEventListener('pointerdown', e => {
+  const st = STEPS[step], p = svgPt(e), w = dirOf(ctr(st), p);
+  const k = st.hit && st.hit(p);
+  if (k) {
+    if (!st.drag) { flip(k); return render(); }
+    // Auf ziehbaren Folien entscheidet erst die Bewegung: Tippen deckt auf, Ziehen zieht.
+    pend = { k, p }; try { fig.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); return;
+  }
+  if (st.tap) { st.tap(w, p); return render(); }
+  if (!st.drag) return;
+  if (st.down && st.down(p) === false) return;
+  down = true; try { fig.setPointerCapture(e.pointerId); } catch (x) {}
+  st.drag(w, p); render(); e.preventDefault();
+});
+fig.addEventListener('pointermove', e => {
+  const st = STEPS[step];
+  if (pend) {
+    const p = svgPt(e); if (dist(p, pend.p) < 10) return;
+    pend = null; if (st.down && st.down(p) === false) return;
+    down = true; st.drag(dirOf(ctr(st), p), p); return render();
+  }
+  if (down && st.drag) { const p = svgPt(e); st.drag(dirOf(ctr(st), p), p); render(); } });
+const up = () => { if (pend) { flip(pend.k); pend = null; return render(); } if (down) { down = false; const st = STEPS[step]; if (st.up) { st.up(); render(); } } };
+fig.addEventListener('pointerup', up); fig.addEventListener('pointercancel', () => { pend = null; up(); });
+if (typeof onGo === 'function') onGo();
+if (STEPS[0].enter) STEPS[0].enter();
+render();
+// Vollbild: Knopf oder Taste F. Nach einem Seitenwechsel holt der erste Tipp das Vollbild zurück.
+(() => {
+  const d = document, el = d.documentElement, b = d.getElementById('fs');
+  if (!b) return;
+  // Als App vom Home-Bildschirm gibt es keine Browserleisten. Vollbild brächte dort nur das X oben links.
+  const app = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  if (app || !(d.fullscreenEnabled || d.webkitFullscreenEnabled)) { b.hidden = true; return; }
+  const on = () => !!(d.fullscreenElement || d.webkitFullscreenElement);
+  const want = v => { try { if (v === undefined) return sessionStorage.getItem('fs') === '1'; sessionStorage.setItem('fs', v ? '1' : '0'); } catch (e) { return false; } };
+  const call = (o, f) => { if (!f) return; try { const p = f.call(o); if (p && p.catch) p.catch(() => {}); } catch (e) {} };
+  const enter = () => call(el, el.requestFullscreen || el.webkitRequestFullscreen);
+  const exit = () => call(d, d.exitFullscreen || d.webkitExitFullscreen);
+  const toggle = () => { if (on()) { want(false); exit(); } else { want(true); enter(); } };
+  let leaving = false;
+  const sync = () => {
+    const f = on(); el.classList.toggle('fs', f); if (!f) el.classList.remove('wide');
+    b.setAttribute('aria-pressed', f); b.title = f ? 'Vollbild beenden (F)' : 'Vollbild (F)';
+  };
+  const change = () => { sync(); if (!on() && !leaving) want(false); };   // mit X oder Esc beendet
+  b.addEventListener('click', toggle);
+  d.addEventListener('fullscreenchange', change);
+  d.addEventListener('webkitfullscreenchange', change);
+  d.addEventListener('click', e => {
+    const a = e.target.closest('a[href]');
+    if (a) { if (!a.hasAttribute('download')) leaving = true; return; }
+    if (!b.contains(e.target) && !on() && want()) enter();
+  }, true);
+  d.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggle(); }
+    else if (e.key !== 'Escape' && !on() && want()) enter();
+  });
+  addEventListener('pagehide', () => { leaving = true; });
+  addEventListener('pageshow', () => { leaving = false; sync(); });
+  sync();
+})();
+// App vom Home-Bildschirm: Sie hat keine Zurück-Taste. Links führen deshalb nur zu eigenen Seiten, und die haben alle einen Weg zum Menü.
+if (navigator.standalone === true || matchMedia('(display-mode: standalone)').matches) document.addEventListener('click', e => {
+  const a = e.target.closest('a[href]'); if (!a) return;
+  const u = new URL(a.href);
+  if (a.hasAttribute('download') || u.origin !== location.origin || !/(\/|\.html)$/.test(u.pathname)) e.preventDefault();
+}, true);
+// Offline: Nach dem ersten Aufruf liegen alle Stunden und Arbeitsblätter im Speicher.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
