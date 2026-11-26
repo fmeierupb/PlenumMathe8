@@ -308,10 +308,10 @@ const zeit = (t, sek) => ({ t, solo: 1, timer: sek, btns: [TBTN], fig: () => '' 
 
 const STEPS = [
   quizStep('1. Quiz: ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile 1. Quiz ein.'),
-  zeit('Arbeitszeit: Aufgabe 1 und 2', 900),
+  zeit('Arbeitszeit: Aufgabe 1 bis 3', 900),
   wStep('Besprechung: Aufgabe 1', 50, 0, 0, true),
   wStep('Besprechung: Aufgabe 2', 50, 0, 1, false),
-  zeit('Arbeitszeit: Aufgabe 3 bis 6', 1200),
+  zeit('Arbeitszeit: Aufgabe 4 bis 6', 1200),
   { t: 'Besprechung: Aufgabe 4', rv: 1, parts: ['r'], hit: () => 'r', enter: () => { CF = { w: 50, gk: -1, gi: -1, one: false }; }, btns: [{ l: 'Nächstes Paar', f: paarNeu }],
     fig: paarFig, eq: paarEq, txt: () => 'abcdef'[pair % 6] + ') Welche Regel?' },
   wStep('Besprechung: Aufgabe 5', 110, 1, 2, false),
