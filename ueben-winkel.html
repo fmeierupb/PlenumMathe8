@@ -67,18 +67,23 @@ svg .tk{fill:#fff;font:700 30px system-ui,sans-serif}
 /* Zeichnung links, Timer als Ring mittig rechts daneben. Hochkant steht der Ring über der Zeichnung. */
 #stage{flex:1;min-height:0;display:flex;align-items:center;gap:16px}
 #stage #fig{flex:1;min-width:0;height:100%}
-#timer{flex:none;width:min(27vw,46vh);cursor:pointer}
+#timer{flex:none;position:relative;--d:min(27vw,46vh);width:var(--d);cursor:pointer}
 #timer svg{display:block;width:100%}
 #timer .rt{fill:none;stroke:var(--line);stroke-width:13}
 #timer .rp{fill:none;stroke:var(--c1);stroke-width:13;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
-#timer .rz{fill:var(--fg);font:800 50px system-ui,sans-serif;font-variant-numeric:tabular-nums}
+/* Die Zeit liegt als eigenes Feld über dem Ring und wird darin mittig gesetzt. Das stimmt in jedem Browser, anders als die Grundlinie von SVG-Text. */
+#tzeit{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-top:.1em;font-size:calc(var(--d)*.25);line-height:1;font-weight:800;font-variant-numeric:tabular-nums;color:var(--fg)}
 #timer.knapp .rp{stroke:var(--c2)}
-#timer.knapp .rz{fill:var(--c2)}
+#timer.knapp #tzeit{color:var(--c2)}
 #timer.aus .rp{stroke:#d81e1e}
-#timer.aus .rz{fill:#d81e1e}
+#timer.aus #tzeit{color:#d81e1e}
 #timer.aus{animation:blink 1s steps(2,start) 8}
 @keyframes blink{to{visibility:hidden}}
-@media (max-aspect-ratio:1/1){#stage{flex-direction:column}#stage #fig{width:100%;height:auto;min-height:0}#timer{width:min(34vw,20vh)}}
+/* Arbeitszeit: nur der Timer, groß in der Bildmitte */
+body.solo #fig{display:none}
+body.solo #stage{justify-content:center}
+body.solo #timer{--d:min(62vw,56vh)}
+@media (max-aspect-ratio:1/1){#stage{flex-direction:column}#stage #fig{width:100%;height:auto;min-height:0}#timer{--d:min(34vw,20vh)}}
 svg .cell{fill:none;stroke:var(--line);stroke-width:2}
 svg .rl{fill:var(--fg);font:600 19px system-ui,sans-serif}
 svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
@@ -86,7 +91,7 @@ svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
 </head>
 <body>
 <h1 id="title"></h1>
-<div id="stage"><svg id="fig" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg"></svg><div id="timer" hidden title="Tippen setzt den Timer zurück"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle class="rt" cx="100" cy="100" r="86"/><circle class="rp" id="tring" cx="100" cy="100" r="86" transform="rotate(-90 100 100)"/><text class="rz" id="tzeit" x="100" y="103" text-anchor="middle" dominant-baseline="central"></text></svg></div></div>
+<div id="stage"><svg id="fig" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg"></svg><div id="timer" hidden title="Tippen setzt den Timer zurück"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle class="rt" cx="100" cy="100" r="86"/><circle class="rp" id="tring" cx="100" cy="100" r="86" transform="rotate(-90 100 100)"/></svg><div id="tzeit"></div></div></div>
 <div id="txt"></div>
 <div id="eq"></div>
 <footer>
@@ -297,16 +302,21 @@ function hit6(p) { const x = (p.x - X6) / Z6, y = (p.y - Y6) / Z6; return x >= 0
 
 const onGo = () => { last = null; T0 = STEPS[step].timer || 300; tReset(); };
 
+// Arbeitszeit: Folie nur mit Überschrift und großem Timer
+const zeit = (t, sek) => ({ t, solo: 1, timer: sek, btns: [TBTN], fig: () => '' });
+
 const STEPS = [
-  quizStep('1. Quiz ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile 1. Quiz ein.'),
-  wStep('Aufgabe 1', 50, 0, 0, true, { timer: 900, btns: [TBTN], txt: 'Jetzt Aufgabe 1 und 2 auf dem Blatt.' }),
-  wStep('Aufgabe 2', 50, 0, 1, false),
-  { t: 'Aufgabe 4', rv: 1, timer: 1200, parts: ['r'], hit: () => 'r', enter: () => { CF = { w: 50, gk: -1, gi: -1, one: false }; }, btns: [TBTN, { l: 'Nächstes Paar', f: paarNeu }],
-    fig: paarFig, eq: paarEq, txt: () => pair ? 'abcdef'[pair % 6] + ') Welche Regel?' : 'Jetzt Aufgabe 3 bis 6 auf dem Blatt.' },
-  wStep('Aufgabe 5', 110, 1, 2, false),
-  { t: 'Aufgabe 6', rv: 1, parts: ['q0', 'q1'], hit: hit6, enter: () => { quiz = SET6; },
+  quizStep('1. Quiz: ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile 1. Quiz ein.'),
+  zeit('Arbeitszeit: Aufgabe 1 und 2', 900),
+  wStep('Besprechung: Aufgabe 1', 50, 0, 0, true),
+  wStep('Besprechung: Aufgabe 2', 50, 0, 1, false),
+  zeit('Arbeitszeit: Aufgabe 3 bis 6', 1200),
+  { t: 'Besprechung: Aufgabe 4', rv: 1, parts: ['r'], hit: () => 'r', enter: () => { CF = { w: 50, gk: -1, gi: -1, one: false }; }, btns: [{ l: 'Nächstes Paar', f: paarNeu }],
+    fig: paarFig, eq: paarEq, txt: () => 'abcdef'[pair % 6] + ') Welche Regel?' },
+  wStep('Besprechung: Aufgabe 5', 110, 1, 2, false),
+  { t: 'Besprechung: Aufgabe 6', rv: 1, parts: ['q0', 'q1'], hit: hit6, enter: () => { quiz = SET6; },
     fig: () => `<g transform="translate(${f(X6)} ${f(Y6)}) scale(${Z6})">${cellFig(0, 1) + cellFig(1, 1)}</g>` },
-  quizStep('2. Quiz ohne Hilfen', SETB, 'Trag deine Ergebnisse in die Zeile 2. Quiz ein. Wie viele sind richtig?'),
+  quizStep('2. Quiz: ohne Hilfen', SETB, 'Trag deine Ergebnisse in die Zeile 2. Quiz ein. Wie viele sind richtig?'),
 ];
 
 // ---------- Ablauf ----------
@@ -346,7 +356,7 @@ function reserve(st) {
 const grow = () => BOX.forEach(id => { const e = $(id), h = e.offsetHeight; if (h > parseFloat(e.style.minHeight || 0)) e.style.minHeight = h + 'px'; });
 function render() {
   const st = STEPS[step];
-  $('timer').hidden = !st.timer; tShow();
+  $('timer').hidden = !st.timer; document.body.classList.toggle('solo', !!st.solo); tShow();
   if (shownStep !== step) reserve(st);
   $('fig').innerHTML = st.fig();
   put(st); grow();
