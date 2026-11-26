@@ -84,14 +84,15 @@ body.solo #fig{display:none}
 body.solo #stage{justify-content:center}
 body.solo #timer{--d:min(62vw,56vh)}
 @media (max-aspect-ratio:1/1){#stage{flex-direction:column}#stage #fig{width:100%;height:auto;min-height:0}#timer{--d:min(34vw,20vh)}}
-/* Quizbilder für die letzte Reihe: kräftige Farben, dicke Geraden, große Zahlen */
-svg .fr{fill:#ef3b3b;opacity:.95}
-svg .q1{fill:var(--c1);opacity:.9}
-svg .q2{fill:var(--c2);opacity:.95}
-svg .cell{fill:none;stroke:var(--mut);stroke-width:2}
-svg .rl{fill:var(--fg);font:700 24px system-ui,sans-serif}
-svg .tq{fill:var(--fg);font:800 36px system-ui,sans-serif}
-svg .nq{fill:var(--fg);font:800 30px system-ui,sans-serif}
+/* Quizbilder für die letzte Reihe: große Zahlen und klare Farben, aber feine Geraden und Rahmen */
+svg .fr{fill:#ef3b3b;opacity:.85}
+svg .q1{fill:var(--c1);opacity:.8}
+svg .q2{fill:var(--c2);opacity:.85}
+svg .cell{fill:none;stroke:var(--line);stroke-width:1.5}
+svg .lq{stroke:var(--fg);stroke-width:3.5;stroke-linecap:round;fill:none}
+svg .rl{fill:var(--fg);font:600 24px system-ui,sans-serif}
+svg .tq{fill:var(--fg);font:600 36px system-ui,sans-serif}
+svg .nq{fill:var(--mut);font:700 28px system-ui,sans-serif}
 /* Im Quiz bekommt die Zeichnung die Höhe der leeren Rechenzeile dazu, der Ring ist etwas schmaler. */
 body.quiz #timer{--d:min(19vw,40vh)}
 body.quiz #eq{display:none}
@@ -193,9 +194,9 @@ function cellFig(i, plain) {
   // gegeben: blau. gefragt: rot mit rotem Fragezeichen, aufgedeckt in der Farbe gleich großer Winkel.
   const giv = (p, a1, a2) => wq(p, a1, a2, 'q1', (a2 - a1) + '°', r);
   const ask = (p, a1, a2) => wq(p, a1, a2, open ? (a2 - a1 === a ? 'q1' : 'q2') : 'fr', open ? (a2 - a1) + '°' : '?', r, open ? 'tq' : 'tq tr');
-  const hl = (p, u = 0) => seg(pol(120, u, p), pol(120, u + 180, p));
+  const hl = (p, u = 0) => seg(pol(120, u, p), pol(120, u + 180, p), 'lq');
   // Die schräge Gerade reicht so weit, wie die Zelle Platz lässt.
-  const len = Math.min(118, 98 / Math.sin(rad(a))), schraeg = seg(pol(len, a, c), pol(len, a + 180, c));
+  const len = Math.min(118, 98 / Math.sin(rad(a))), schraeg = seg(pol(len, a, c), pol(len, a + 180, c), 'lq');
   let rule = open ? RUL[ty] : '';
   if (one) {
     s += giv(c, 0, a) + (ty === 'S' ? ask(c, 180, a + 180) : ask(c, a, 180)) + hl(c) + schraeg;
