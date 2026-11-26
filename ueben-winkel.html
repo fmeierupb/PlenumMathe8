@@ -20,7 +20,7 @@ body{display:flex;flex-direction:column;height:100dvh;padding:12px 16px calc(12p
 h1{margin:0;font-size:clamp(26px,4.2vw,52px);line-height:1.15;min-height:1.2em}
 #fig{flex:1;min-height:0;width:100%;touch-action:none}
 #txt{font-size:clamp(24px,3vw,38px);min-height:1.4em;text-align:center}
-#eq{font-size:clamp(26px,4.1vw,50px);font-weight:700;min-height:1.4em;text-align:center;font-variant-numeric:tabular-nums;line-height:1.35}
+#eq{font-size:clamp(26px,4.1vw,50px);font-weight:600;min-height:1.4em;text-align:center;font-variant-numeric:tabular-nums;line-height:1.35}
 #eq .dim{opacity:.4;font-size:.8em}
 #eq .k.c1{color:var(--c1)}#eq .k.c2{color:var(--c2)}#eq .k.c3{color:var(--c3)}#eq .k.cr{color:#d81e1e}#eq .k.n{color:var(--mut)}
 footer{display:flex;gap:10px;align-items:center;margin-top:10px}
@@ -69,10 +69,10 @@ svg .tk{fill:#fff;font:700 30px system-ui,sans-serif}
 #stage #fig{flex:1;min-width:0;height:100%}
 #timer{flex:none;position:relative;--d:min(27vw,46vh);width:var(--d);cursor:pointer}
 #timer svg{display:block;width:100%}
-#timer .rt{fill:none;stroke:var(--line);stroke-width:10}
-#timer .rp{fill:none;stroke:var(--c1);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+#timer .rt{fill:none;stroke:var(--line);stroke-width:7}
+#timer .rp{fill:none;stroke:var(--c1);stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
 /* Die Zeit ist halbfett. Ihre Höhe im Ring wird aus der wirklichen Ziffernhöhe der Schrift berechnet (tMitte), weil jede Schrift die Ziffern anders in die Zeile setzt. */
-#timer .rz{fill:var(--fg);font:600 52px system-ui,sans-serif;font-variant-numeric:tabular-nums}
+#timer .rz{fill:var(--fg);font:500 52px system-ui,sans-serif;font-variant-numeric:tabular-nums}
 #timer.knapp .rp{stroke:var(--c2)}
 #timer.knapp .rz{fill:var(--c2)}
 #timer.aus .rp{stroke:#d81e1e}
@@ -84,18 +84,18 @@ body.solo #fig{display:none}
 body.solo #stage{justify-content:center}
 body.solo #timer{--d:min(62vw,56vh)}
 @media (max-aspect-ratio:1/1){#stage{flex-direction:column}#stage #fig{width:100%;height:auto;min-height:0}#timer,body.quiz #timer{--d:min(34vw,20vh)}}
-/* Quizbilder für die letzte Reihe: große Zahlen und klare Farben, aber feine Geraden und Rahmen */
-svg .fr{fill:#ef3b3b;opacity:.85}
-svg .q1{fill:var(--c1);opacity:.8}
-svg .q2{fill:var(--c2);opacity:.85}
-/* Keine Beschriftung unter 24. Winkel in den großen Bildern 36, Geradennamen 36, Hinweis g ∥ h 28. */
-svg .tl{fill:var(--fg);font:700 36px system-ui,sans-serif}
-svg .tm{fill:var(--mut);font:600 28px system-ui,sans-serif}
-svg .cell{fill:none;stroke:var(--line);stroke-width:1.5}
-svg .lq{stroke:var(--fg);stroke-width:3.5;stroke-linecap:round;fill:none}
-svg .rl{fill:var(--fg);font:600 26px system-ui,sans-serif}
-svg .tq{fill:var(--fg);font:600 36px system-ui,sans-serif}
-svg .nq{fill:var(--mut);font:700 28px system-ui,sans-serif}
+/* Bilder dieser Stunde: große Schrift, aber feine Geraden, leichte Flächen und Luft um jede Zahl. Keine Beschriftung unter 24. */
+#fig .ln{stroke-width:3}
+svg .fr{fill:#ef3b3b;opacity:.7}
+svg .q1{fill:var(--c1);opacity:.6}
+svg .q2{fill:var(--c2);opacity:.7}
+svg .lq{stroke:var(--fg);stroke-width:2.5;stroke-linecap:round;fill:none}
+svg .rl{fill:var(--fg);font:500 26px system-ui,sans-serif}
+svg .tq{fill:var(--fg);font:500 34px system-ui,sans-serif}
+svg .nq{fill:var(--mut);font:500 26px system-ui,sans-serif}
+svg .tl{fill:var(--fg);font:500 34px system-ui,sans-serif}
+svg .tm{fill:var(--mut);font:500 28px system-ui,sans-serif}
+svg .cell{fill:none;stroke:var(--line);stroke-width:1}
 /* Im Quiz bekommt die Zeichnung die Höhe der leeren Rechenzeile dazu, der Ring ist etwas schmaler. */
 body.quiz #timer{--d:min(19vw,40vh)}
 body.quiz #eq{display:none}
@@ -181,20 +181,20 @@ let quiz = SETA;
 // Glatte Zehner ohne 90°. An einer Kreuzung 50° bis 130°, an zwei Parallelen 60° bis 120°, sonst rutschen Beschriftungen aus der Zelle.
 const zehn = (lo, hi) => { let n; do n = 10 * rnd(lo, hi); while (n === 90); return n; };
 function newQuiz() {
-  const p = zehn(6, 12);
-  quiz = [['S', zehn(5, 13)], ['N', zehn(5, 13)], ['T', zehn(6, 12)], ['W', zehn(6, 12)], ['TN', zehn(6, 12)], ['P', p, pick([p, p, p - 10, p + 10])]];
+  const p = zehn(6, 11);
+  quiz = [['S', zehn(5, 13)], ['N', zehn(5, 13)], ['T', zehn(6, 12)], ['W', zehn(6, 12)], ['TN', zehn(6, 12)], ['P', p, pick([p, p + 10])]];
   opened = new Set(); shown = false; sub = 0;
 }
-// Winkelfläche mit großer Zahl. Die Zahl sitzt so weit außen, dass ihr Kasten zu beiden Schenkeln 12 Abstand hält und keine Gerade berührt.
+// Winkelfläche mit großer Zahl. Die Zahl sitzt so weit außen, dass ihr Kasten zu beiden Schenkeln 16 Abstand hält und keine Gerade berührt.
 function wq(c, a1, a2, cls, label, r, tcls = 'tq') {
-  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), t = String(label), hw = (t === '?' ? 10 : (t.length - 1) * 11 + 6.5) * K, hh = 13 * K;
-  const need = w => (12 + hw * Math.abs(Math.sin(rad(w))) + hh * Math.abs(Math.cos(rad(w)))) / Math.sin(rad(d / 2));
+  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), t = String(label), hw = (t === '?' ? 10 : (t.length - 1) * 10.4 + 6) * K, hh = 12 * K;
+  const need = w => (16 + hw * Math.abs(Math.sin(rad(w))) + hh * Math.abs(Math.cos(rad(w)))) / Math.sin(rad(d / 2));
   const lr = Math.max(r + 22 * K, need(a1), need(a2));
   return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label, tcls);
 }
 function cellFig(i, plain) {
   const [ty, a, b2] = quiz[i], x0 = (i % 3) * CW, y0 = Math.floor(i / 3) * CH, c = P(x0 + CW / 2, y0 + 152), open = vis('q' + i);
-  const one = ty === 'S' || ty === 'N', r = one ? 40 : 34;
+  const one = ty === 'S' || ty === 'N', r = one ? 32 : 28;
   let s = `<rect class="cell" x="${f(x0 + 4)}" y="${y0 + 4}" width="${f(CW - 8)}" height="${CH - 8}" rx="14"/>` + (plain ? '' : text(P(x0 + 26, y0 + 27), i + 1, 'nq'));
   // gegeben: blau. gefragt: rot mit rotem Fragezeichen, aufgedeckt in der Farbe gleich großer Winkel.
   const giv = (p, a1, a2) => wq(p, a1, a2, 'q1', (a2 - a1) + '°', r);
@@ -282,10 +282,10 @@ function regel(k, i) {
   if (d === 2) return ['Wechselwinkel zu', gk, gi];
   return ['Stufenwinkel zu', gk, i];
 }
-// Winkelfläche mit Beschriftung in Größe 36. Der Kasten der Beschriftung hält zu beiden Schenkeln 12 Abstand.
+// Winkelfläche mit Beschriftung in Größe 34. Der Kasten der Beschriftung hält zu beiden Schenkeln 16 Abstand.
 function wl(c, a1, a2, r, cls, label) {
-  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), hw = (String(label).length * 10.4 + 4) * K, hh = 14 * K;
-  const need = w => (12 + hw * Math.abs(Math.sin(rad(w))) + hh * Math.abs(Math.cos(rad(w)))) / Math.sin(rad(d / 2));
+  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), hw = (String(label).length * 9.8 + 4) * K, hh = 13 * K;
+  const need = w => (16 + hw * Math.abs(Math.sin(rad(w))) + hh * Math.abs(Math.cos(rad(w)))) / Math.sin(rad(d / 2));
   const lr = Math.max(r + 27 * K, need(a1), need(a2));
   return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label, 'tl');
 }
@@ -300,7 +300,7 @@ function wFig() {
   let s = '';
   kreuz().forEach((c, k) => spans(CF.w).forEach((sp, i) => {
     const giv = k === CF.gk && i === CF.gi, on = giv || vis(k + ',' + i);
-    s += wl(c, sp[0], sp[1], CF.one ? 80 : 64, on ? farbe(i) : 'n', giv ? `${nam(k, i)} = ${wert(i)}°` : on ? wert(i) + '°' : nam(k, i));
+    s += wl(c, sp[0], sp[1], CF.one ? 56 : 46, on ? farbe(i) : 'n', giv ? `${nam(k, i)} = ${wert(i)}°` : on ? wert(i) + '°' : nam(k, i));
   }));
   return s + linien();
 }
@@ -326,7 +326,7 @@ const PAARE = [[0, 0, 0, 2, 'Scheitelwinkel'], [0, 0, 0, 1, 'Nebenwinkel'], [0, 
 function paarFig() {
   const [k1, i1, k2, i2] = PAARE[pair % 6]; let s = '';
   kreuz().forEach((c, k) => spans(CF.w).forEach((sp, i) => {
-    s += wl(c, sp[0], sp[1], 64, (k === k1 && i === i1) || (k === k2 && i === i2) ? farbe(i) : 'n', nam(k, i));
+    s += wl(c, sp[0], sp[1], 46, (k === k1 && i === i1) || (k === k2 && i === i2) ? farbe(i) : 'n', nam(k, i));
   }));
   return s + linien();
 }
@@ -342,9 +342,19 @@ const paarTxt = () => 'abcdef'[pair % 6] + ') ' + (stufe() >= 2 ? SATZ[PAARE[pai
 const paarTap = () => { const l = stufe(); if (l < 2) { shown = true; sub = l + 1; } else sub = 1; };
 const paarNeu = () => { pair++; opened = new Set(); shown = false; sub = 0; };
 
-// Aufgabe 6: zwei Bilder mit Stufenwinkeln, parallel oder nicht. Die Zellen vom Quiz, größer und in der Bildmitte.
-const SET6 = [['P', 70, 70], ['P', 60, 50]], Z6 = 1.3, X6 = (800 - 2 * CW * Z6) / 2, Y6 = (520 - CH * Z6) / 2;
-function hit6(p) { const x = (p.x - X6) / Z6, y = (p.y - Y6) / Z6; return x >= 0 && x < 2 * CW && y >= 0 && y < CH ? 'q' + Math.floor(x / CW) : null; }
+// Aufgabe 6: zwei große Bilder nebeneinander, links 70° und 70°, rechts 60° und 50°. Antippen zeigt, ob g und h parallel sind.
+const SET6 = [[70, 70], [60, 50]];
+function fig6() {
+  let s = '';
+  SET6.forEach(([a, b2], n) => {
+    const cx = 200 + 400 * n, dx = 90 / Math.tan(rad(a)), T = P(cx + dx, 190), B = P(cx - dx, 370), u = a - b2;
+    s += wl(T, 0, a, 46, 'c1', a + '°') + wl(B, u, a, 46, u ? 'c2' : 'c1', b2 + '°');
+    s += seg(P(cx - 175, T.y), P(cx + 175, T.y)) + seg(pol(175, u, P(cx, B.y - (cx - B.x) * Math.tan(rad(u)))), pol(175, u + 180, P(cx, B.y - (cx - B.x) * Math.tan(rad(u)))));
+    s += seg(pol(215, a, P(cx, 280)), pol(215, a + 180, P(cx, 280)));
+    if (vis('q' + n)) s += text(P(cx, 34), u ? 'nicht parallel' : 'parallel', 'tl');
+  });
+  return s;
+}
 
 const onGo = () => { last = null; T0 = STEPS[step].timer || 300; tReset(); };
 
@@ -360,8 +370,7 @@ const STEPS = [
   { t: 'Lösung Aufgabe 4', rv: 2, tap: paarTap, each: m => m({ txt: 'a) ' + SATZ.Wechselwinkel }), enter: () => { CF = { w: 50, gk: -1, gi: -1, one: false }; }, btns: [{ l: 'Nächstes Paar', f: paarNeu }],
     fig: paarFig, eq: paarEq, txt: paarTxt },
   wStep('Lösung Aufgabe 5', 110, 1, 2, false),
-  { t: 'Lösung Aufgabe 6', rv: 1, parts: ['q0', 'q1'], hit: hit6, enter: () => { quiz = SET6; },
-    fig: () => `<g transform="translate(${f(X6)} ${f(Y6)}) scale(${Z6})">${cellFig(0, 1) + cellFig(1, 1)}</g>` },
+  { t: 'Lösung Aufgabe 6', rv: 1, parts: ['q0', 'q1'], hit: p => 'q' + (p.x < 400 ? 0 : 1), fig: fig6 },
   quizStep('2. Quiz', SETB, 'Trag deine Ergebnisse in die Zeile 2. Quiz ein. Wie viele sind richtig?'),
 ];
 
