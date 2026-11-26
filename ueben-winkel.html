@@ -19,8 +19,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:
 body{display:flex;flex-direction:column;height:100dvh;padding:12px 16px calc(12px + env(safe-area-inset-bottom));user-select:none;-webkit-user-select:none}
 h1{margin:0;font-size:clamp(26px,4.2vw,52px);line-height:1.15;min-height:1.2em}
 #fig{flex:1;min-height:0;width:100%;touch-action:none}
-#txt{font-size:clamp(18px,2.6vw,32px);min-height:1.4em;text-align:center}
-#eq{font-size:clamp(22px,3.6vw,44px);font-weight:700;min-height:1.4em;text-align:center;font-variant-numeric:tabular-nums;line-height:1.35}
+#txt{font-size:clamp(24px,3vw,38px);min-height:1.4em;text-align:center}
+#eq{font-size:clamp(26px,4.1vw,50px);font-weight:700;min-height:1.4em;text-align:center;font-variant-numeric:tabular-nums;line-height:1.35}
 #eq .dim{opacity:.4;font-size:.8em}
 #eq .k.c1{color:var(--c1)}#eq .k.c2{color:var(--c2)}#eq .k.c3{color:var(--c3)}#eq .k.cr{color:#d81e1e}#eq .k.n{color:var(--mut)}
 footer{display:flex;gap:10px;align-items:center;margin-top:10px}
@@ -88,6 +88,9 @@ body.solo #timer{--d:min(62vw,56vh)}
 svg .fr{fill:#ef3b3b;opacity:.85}
 svg .q1{fill:var(--c1);opacity:.8}
 svg .q2{fill:var(--c2);opacity:.85}
+/* Keine Beschriftung unter 24. Winkel in den großen Bildern 36, Geradennamen 36, Hinweis g ∥ h 28. */
+svg .tl{fill:var(--fg);font:700 36px system-ui,sans-serif}
+svg .tm{fill:var(--mut);font:600 28px system-ui,sans-serif}
 svg .cell{fill:none;stroke:var(--line);stroke-width:1.5}
 svg .lq{stroke:var(--fg);stroke-width:3.5;stroke-linecap:round;fill:none}
 svg .rl{fill:var(--fg);font:600 24px system-ui,sans-serif}
@@ -264,17 +267,25 @@ function regel(k, i) {
   if (d === 2) return ['Wechselwinkel zu', gk, gi];
   return ['Stufenwinkel zu', gk, i];
 }
+// Winkelfläche mit Beschriftung in Größe 36. Der Kasten der Beschriftung hält zu beiden Schenkeln 12 Abstand.
+function wl(c, a1, a2, r, cls, label) {
+  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), hw = String(label).length * 10.4 + 4, hh = 14;
+  const need = w => (12 + hw * Math.abs(Math.sin(rad(w))) + hh * Math.abs(Math.cos(rad(w)))) / Math.sin(rad(d / 2));
+  const lr = Math.max(r + 27, need(a1), need(a2));
+  return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label, 'tl');
+}
 function linien() {
   const cs = kreuz(); let s = '';
-  cs.forEach((c, k) => { s += seg(P(-100, c.y), P(900, c.y)) + text(P(770, c.y - 26), 'gh'[k]); });
+  cs.forEach((c, k) => { s += seg(P(-100, c.y), P(900, c.y)) + text(P(768, c.y - 30), 'gh'[k], 'tl'); });
   const c = cs[0];
-  return s + xline(c, CF.w) + text(P(c.x + (c.y - 30) / Math.tan(rad(CF.w)) - 28, 30), 'f') + (CF.one ? '' : text(P(60, 30), 'g ∥ h', 'ts'));
+  // f steht oben neben seiner Geraden, auf der Seite, auf der kein Winkel beschriftet ist.
+  return s + xline(c, CF.w) + text(P(c.x + (c.y - 32) / Math.tan(rad(CF.w)) + (CF.w < 90 ? 30 : -30), 32), 'f', 'tl') + (CF.one ? '' : text(P(70, 34), 'g ∥ h', 'tm'));
 }
 function wFig() {
   let s = '';
   kreuz().forEach((c, k) => spans(CF.w).forEach((sp, i) => {
     const giv = k === CF.gk && i === CF.gi, on = giv || vis(k + ',' + i);
-    s += wedge(c, sp[0], sp[1], CF.one ? 70 : 54, on ? farbe(i) : 'n', giv ? `${nam(k, i)} = ${wert(i)}°` : on ? wert(i) + '°' : nam(k, i), 'tx', 150);
+    s += wl(c, sp[0], sp[1], CF.one ? 80 : 64, on ? farbe(i) : 'n', giv ? `${nam(k, i)} = ${wert(i)}°` : on ? wert(i) + '°' : nam(k, i));
   }));
   return s + linien();
 }
@@ -300,7 +311,7 @@ const PAARE = [[0, 0, 0, 2, 'Scheitelwinkel'], [0, 0, 0, 1, 'Nebenwinkel'], [0, 
 function paarFig() {
   const [k1, i1, k2, i2] = PAARE[pair % 6]; let s = '';
   kreuz().forEach((c, k) => spans(CF.w).forEach((sp, i) => {
-    s += wedge(c, sp[0], sp[1], 54, (k === k1 && i === i1) || (k === k2 && i === i2) ? farbe(i) : 'n', nam(k, i), 'tx', 150);
+    s += wl(c, sp[0], sp[1], 64, (k === k1 && i === i1) || (k === k2 && i === i2) ? farbe(i) : 'n', nam(k, i));
   }));
   return s + linien();
 }
