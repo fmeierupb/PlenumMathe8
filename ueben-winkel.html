@@ -72,7 +72,7 @@ svg .tk{fill:#fff;font:700 30px system-ui,sans-serif}
 #timer .rt{fill:none;stroke:var(--line);stroke-width:13}
 #timer .rp{fill:none;stroke:var(--c1);stroke-width:13;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
 /* Die Zeit liegt als eigenes Feld über dem Ring und wird darin mittig gesetzt. Das stimmt in jedem Browser, anders als die Grundlinie von SVG-Text. */
-#tzeit{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-top:.1em;font-size:calc(var(--d)*.25);line-height:1;font-weight:800;font-variant-numeric:tabular-nums;color:var(--fg)}
+#tzeit{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-top:.1em;font-size:calc(var(--d)*.27);line-height:1;font-weight:800;font-variant-numeric:tabular-nums;color:var(--fg)}
 #timer.knapp .rp{stroke:var(--c2)}
 #timer.knapp #tzeit{color:var(--c2)}
 #timer.aus .rp{stroke:#d81e1e}
@@ -84,9 +84,17 @@ body.solo #fig{display:none}
 body.solo #stage{justify-content:center}
 body.solo #timer{--d:min(62vw,56vh)}
 @media (max-aspect-ratio:1/1){#stage{flex-direction:column}#stage #fig{width:100%;height:auto;min-height:0}#timer{--d:min(34vw,20vh)}}
-svg .fr{fill:#ef3b3b;opacity:.92}
-svg .cell{fill:none;stroke:var(--line);stroke-width:2}
-svg .rl{fill:var(--fg);font:600 19px system-ui,sans-serif}
+/* Quizbilder für die letzte Reihe: kräftige Farben, dicke Geraden, große Zahlen */
+svg .fr{fill:#ef3b3b;opacity:.95}
+svg .q1{fill:var(--c1);opacity:.9}
+svg .q2{fill:var(--c2);opacity:.95}
+svg .cell{fill:none;stroke:var(--mut);stroke-width:2}
+svg .rl{fill:var(--fg);font:700 24px system-ui,sans-serif}
+svg .tq{fill:var(--fg);font:800 36px system-ui,sans-serif}
+svg .nq{fill:var(--fg);font:800 30px system-ui,sans-serif}
+/* Im Quiz bekommt die Zeichnung die Höhe der leeren Rechenzeile dazu, der Ring ist etwas schmaler. */
+body.quiz #timer{--d:min(19vw,40vh)}
+body.quiz #eq{display:none}
 svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
 </style>
 </head>
@@ -159,46 +167,50 @@ function outLab(v, p, q, s, cls = 'tx') {
 // ---------- Sechs kurze Aufgaben: 1. Quiz am Anfang, 2. Quiz am Ende ----------
 // Drei Spalten, zwei Zeilen. Jede Zelle zeigt einen gegebenen Winkel und ein Fragezeichen. Antippen deckt Ergebnis und Regel auf.
 const CW = 800 / 3, CH = 260, QK = ['q0', 'q1', 'q2', 'q3', 'q4', 'q5'];
-const RUL = { S: 'Scheitelwinkel', N: 'Nebenwinkel', T: 'Stufenwinkel', W: 'Wechselwinkel', TN: 'Stufen, dann Neben' };
+const RUL = { S: 'Scheitelwinkel', N: 'Nebenwinkel', T: 'Stufenwinkel', W: 'Wechselwinkel', TN: 'Stufen + Neben' };
 // Art und gegebener Winkel. P: zwei Stufenwinkel, gefragt ist, ob die Geraden parallel sind.
-const SETA = [['S', 40], ['N', 40], ['T', 70], ['W', 70], ['TN', 60], ['P', 60, 70]];
+const SETA = [['S', 50], ['N', 50], ['T', 70], ['W', 70], ['TN', 60], ['P', 60, 70]];
 const SETB = [['S', 60], ['N', 130], ['T', 110], ['W', 100], ['TN', 120], ['P', 80, 80]];
 let quiz = SETA;
-// Glatte Zehner ohne 90°. An zwei Parallelen nur 60° bis 120°, sonst rutschen Beschriftungen aus der Zelle.
+// Glatte Zehner ohne 90°. An einer Kreuzung 50° bis 130°, an zwei Parallelen 60° bis 120°, sonst rutschen Beschriftungen aus der Zelle.
 const zehn = (lo, hi) => { let n; do n = 10 * rnd(lo, hi); while (n === 90); return n; };
 function newQuiz() {
   const p = zehn(6, 12);
-  quiz = [['S', zehn(4, 14)], ['N', zehn(4, 14)], ['T', zehn(6, 12)], ['W', zehn(6, 12)], ['TN', zehn(6, 12)], ['P', p, pick([p, p, p - 10, p + 10])]];
+  quiz = [['S', zehn(5, 13)], ['N', zehn(5, 13)], ['T', zehn(6, 12)], ['W', zehn(6, 12)], ['TN', zehn(6, 12)], ['P', p, pick([p, p, p - 10, p + 10])]];
   opened = new Set(); shown = false; sub = 0;
 }
-// Kleine Winkelfläche mit Beschriftung dicht am Bogen.
-function wq(c, a1, a2, cls, label, tcls = 'tx') {
-  const r = 26, d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), half = String(label).length * 8.5 + 12;
-  const lr = Math.max(r + 24, half / Math.tan(rad(d / 2)));
+// Winkelfläche mit großer Zahl. Die Zahl sitzt so weit außen, dass ihr Kasten zu beiden Schenkeln 12 Abstand hält und keine Gerade berührt.
+function wq(c, a1, a2, cls, label, r, tcls = 'tq') {
+  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), t = String(label), hw = t === '?' ? 10 : (t.length - 1) * 11 + 6.5, hh = 13;
+  const need = w => (12 + hw * Math.abs(Math.sin(rad(w))) + hh * Math.abs(Math.cos(rad(w)))) / Math.sin(rad(d / 2));
+  const lr = Math.max(r + 22, need(a1), need(a2));
   return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label, tcls);
 }
 function cellFig(i, plain) {
-  const [ty, a, b2] = quiz[i], x0 = (i % 3) * CW, y0 = Math.floor(i / 3) * CH, c = P(x0 + CW / 2, y0 + 148), open = vis('q' + i);
-  let s = `<rect class="cell" x="${f(x0 + 4)}" y="${y0 + 4}" width="${f(CW - 8)}" height="${CH - 8}" rx="14"/>` + (plain ? '' : text(P(x0 + 24, y0 + 30), i + 1, 'ts'));
+  const [ty, a, b2] = quiz[i], x0 = (i % 3) * CW, y0 = Math.floor(i / 3) * CH, c = P(x0 + CW / 2, y0 + 152), open = vis('q' + i);
+  const one = ty === 'S' || ty === 'N', r = one ? 40 : 34;
+  let s = `<rect class="cell" x="${f(x0 + 4)}" y="${y0 + 4}" width="${f(CW - 8)}" height="${CH - 8}" rx="14"/>` + (plain ? '' : text(P(x0 + 26, y0 + 27), i + 1, 'nq'));
   // gegeben: blau. gefragt: rot mit rotem Fragezeichen, aufgedeckt in der Farbe gleich großer Winkel.
-  const giv = (p, a1, a2) => wq(p, a1, a2, 'c1', (a2 - a1) + '°');
-  const ask = (p, a1, a2) => wq(p, a1, a2, open ? (a2 - a1 === a ? 'c1' : 'c2') : 'fr', open ? (a2 - a1) + '°' : '?', open ? 'tx' : 'tx tr');
-  const hl = (p, u = 0) => seg(pol(108, u, p), pol(108, u + 180, p), 'thin');
+  const giv = (p, a1, a2) => wq(p, a1, a2, 'q1', (a2 - a1) + '°', r);
+  const ask = (p, a1, a2) => wq(p, a1, a2, open ? (a2 - a1 === a ? 'q1' : 'q2') : 'fr', open ? (a2 - a1) + '°' : '?', r, open ? 'tq' : 'tq tr');
+  const hl = (p, u = 0) => seg(pol(120, u, p), pol(120, u + 180, p));
+  // Die schräge Gerade reicht so weit, wie die Zelle Platz lässt.
+  const len = Math.min(118, 98 / Math.sin(rad(a))), schraeg = seg(pol(len, a, c), pol(len, a + 180, c));
   let rule = open ? RUL[ty] : '';
-  if (ty === 'S' || ty === 'N') {
-    s += giv(c, 0, a) + (ty === 'S' ? ask(c, 180, a + 180) : ask(c, a, 180)) + hl(c) + seg(pol(100, a, c), pol(100, a + 180, c), 'thin');
+  if (one) {
+    s += giv(c, 0, a) + (ty === 'S' ? ask(c, 180, a + 180) : ask(c, a, 180)) + hl(c) + schraeg;
   } else {
-    const dx = 38 / Math.tan(rad(a)), T = P(c.x + dx, c.y - 38), B = P(c.x - dx, c.y + 38);
+    const dx = 34 / Math.tan(rad(a)), T = P(c.x + dx, c.y - 34), B = P(c.x - dx, c.y + 34);
     let u = 0;
     s += giv(T, 0, a);
     if (ty === 'T') s += ask(B, 0, a);
     if (ty === 'W') s += ask(B, 180, a + 180);
     if (ty === 'TN') s += ask(B, a, 180);
-    if (ty === 'P') { u = a - b2; s += wq(B, u, a, b2 === a ? 'c1' : 'c2', b2 + '°'); rule = open ? (b2 === a ? 'parallel' : 'nicht parallel') : 'parallel?'; }
+    if (ty === 'P') { u = a - b2; s += wq(B, u, a, b2 === a ? 'q1' : 'q2', b2 + '°', r); rule = open ? (b2 === a ? 'parallel' : 'nicht parallel') : 'parallel?'; }
     // Die untere Gerade ist nur dann parallel gezeichnet, wenn die Stufenwinkel gleich sind.
-    s += hl(P(c.x, T.y)) + hl(P(c.x, B.y - (c.x - B.x) * Math.tan(rad(u))), u) + seg(pol(100, a, c), pol(100, a + 180, c), 'thin');
+    s += hl(P(c.x, T.y)) + hl(P(c.x, B.y - (c.x - B.x) * Math.tan(rad(u))), u) + schraeg;
   }
-  return s + `<text class="rl" x="${f(x0 + CW - 16)}" y="${y0 + 30}" text-anchor="end" dominant-baseline="central">${rule}</text>`;
+  return s + `<text class="rl" x="${f(x0 + CW - 16)}" y="${y0 + 27}" text-anchor="end" dominant-baseline="central">${rule}</text>`;
 }
 const quizFig = () => QK.map((k, i) => cellFig(i)).join('');
 const quizHit = p => 'q' + (clamp(Math.floor(p.x / CW), 0, 2) + 3 * clamp(Math.floor(p.y / CH), 0, 1));
@@ -363,7 +375,7 @@ function reserve(st) {
 const grow = () => BOX.forEach(id => { const e = $(id), h = e.offsetHeight; if (h > parseFloat(e.style.minHeight || 0)) e.style.minHeight = h + 'px'; });
 function render() {
   const st = STEPS[step];
-  $('timer').hidden = !st.timer; document.body.classList.toggle('solo', !!st.solo); tShow();
+  $('timer').hidden = !st.timer; document.body.classList.toggle('solo', !!st.solo); document.body.classList.toggle('quiz', st.parts === QK); tShow();
   if (shownStep !== step) reserve(st);
   $('fig').innerHTML = st.fig();
   put(st); grow();
