@@ -171,9 +171,9 @@ function wq(c, a1, a2, cls, label) {
   const lr = Math.max(r + 24, half / Math.tan(rad(d / 2)));
   return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label);
 }
-function cellFig(i) {
+function cellFig(i, plain) {
   const [ty, a, b2] = quiz[i], x0 = (i % 3) * CW, y0 = Math.floor(i / 3) * CH, c = P(x0 + CW / 2, y0 + 148), open = vis('q' + i);
-  let s = `<rect class="cell" x="${f(x0 + 4)}" y="${y0 + 4}" width="${f(CW - 8)}" height="${CH - 8}" rx="14"/>` + text(P(x0 + 24, y0 + 30), i + 1, 'ts');
+  let s = `<rect class="cell" x="${f(x0 + 4)}" y="${y0 + 4}" width="${f(CW - 8)}" height="${CH - 8}" rx="14"/>` + (plain ? '' : text(P(x0 + 24, y0 + 30), i + 1, 'ts'));
   // gegeben: blau. gefragt: grau mit Fragezeichen, aufgedeckt in der Farbe gleich großer Winkel.
   const giv = (p, a1, a2) => wq(p, a1, a2, 'c1', (a2 - a1) + '°');
   const ask = (p, a1, a2) => wq(p, a1, a2, open ? (a2 - a1 === a ? 'c1' : 'c2') : 'n', open ? (a2 - a1) + '°' : '?');
@@ -223,74 +223,89 @@ function tToggle() {
 }
 const tLabel = () => tInt ? 'Timer anhalten' : tLeft === 0 ? 'Timer zurücksetzen' : tLeft < T0 ? 'Timer weiter' : `Timer ${T0 / 60} min`;
 $('timer').addEventListener('click', () => { tReset(); render(); });
-const quizStep = (t, set, txt) => ({ t, rv: 1, timer: 300, parts: QK, hit: quizHit, enter: () => { quiz = set; }, btns: [{ l: tLabel, f: tToggle }, { l: 'Neue Aufgaben', f: newQuiz }], fig: quizFig, txt });
+const TBTN = { l: tLabel, f: tToggle };
+const quizStep = (t, set, txt) => ({ t, rv: 1, timer: 300, parts: QK, hit: quizHit, enter: () => { quiz = set; }, btns: [TBTN, { l: 'Neue Aufgaben', f: newQuiz }], fig: quizFig, txt });
 
-// ---------- Parallelen g und h mit einer oder zwei schrägen Geraden ----------
-const GY = 130, HY = 390, NM = ['α', 'β', 'γ', 'δ'], SUB = ['₁', '₂', '₃', '₄'], LN = ['f', 'j'];
-// TS: schräge Geraden mit Schnittpunkt x auf g und Richtung w. last: zuletzt angetippter Winkel.
-let TS = [], last = null;
-const pts = T => [P(T.x, GY), P(T.x - (HY - GY) / Math.tan(rad(T.w)), HY)];
-const kk = (t, k, i) => t + ',' + k + ',' + i;
-// Kreuzungen sind durchnummeriert: f mit g ist 1, f mit h ist 2, j mit g ist 3, j mit h ist 4.
-const name = (t, k, i) => NM[i] + SUB[2 * t + k];
-const wert = (t, i) => i % 2 ? 180 - TS[t].w : TS[t].w;
+// ---------- Die Bilder vom Blatt: eine Kreuzung oder zwei Parallelen g und h mit der schrägen Geraden f ----------
+const GY = 130, HY = 390, NM = ['α', 'β', 'γ', 'δ'], SUB = ['₁', '₂'];
+// CF: Richtung w von f, gegebener Winkel (Kreuzung gk, Stelle gi), one: nur eine Kreuzung in der Bildmitte. last: zuletzt angetippter Winkel.
+let CF = { w: 50, gk: 0, gi: 0, one: false }, last = null;
+const kreuz = () => CF.one ? [P(400, 260)] : [P(400 + 130 / Math.tan(rad(CF.w)), GY), P(400 - 130 / Math.tan(rad(CF.w)), HY)];
+// An einer einzelnen Kreuzung ohne Index, an zwei Kreuzungen oben Index 1 und unten Index 2.
+const nam = (k, i) => NM[i] + (CF.one ? '' : SUB[k]);
+const wert = i => i % 2 ? 180 - CF.w : CF.w;
 const farbe = i => i % 2 ? 'c2' : 'c1';
 const spans = w => [[0, w], [w, 180], [180, w + 180], [w + 180, 360]];
-// Alle Winkel außer dem gegebenen α der oberen Kreuzung
-const alle = n => { const a = []; for (let t = 0; t < n; t++) for (let k = 0; k < 2; k++) for (let i = 0; i < 4; i++) if (k || i) a.push(kk(t, k, i)); return a; };
-// Regel zu jedem Winkel: Name der Regel und der Winkel, auf den sie sich bezieht (Kreuzung, Stelle)
-const REGEL = { '0,1': ['Nebenwinkel zu', 0, 0], '0,2': ['Scheitelwinkel zu', 0, 0], '0,3': ['Nebenwinkel zu', 0, 0], '1,0': ['Stufenwinkel zu', 0, 0], '1,1': ['Stufenwinkel zu', 0, 1], '1,2': ['Wechselwinkel zu', 0, 0], '1,3': ['Stufenwinkel zu', 0, 3] };
-function parFig() {
-  let s = '';
-  TS.forEach((T, t) => pts(T).forEach((c, k) => spans(T.w).forEach((sp, i) => {
-    const key = kk(t, k, i), giv = !k && !i, on = giv || vis(key);
-    s += wedge(c, sp[0], sp[1], 54, on ? farbe(i) : 'n', giv ? `${name(t, k, i)} = ${wert(t, i)}°` : on ? wert(t, i) + '°' : name(t, k, i), 'tx', 150);
-  })));
-  return s + linien();
+const keys = one => { const a = []; for (let k = 0; k < (one ? 1 : 2); k++) for (let i = 0; i < 4; i++) a.push(k + ',' + i); return a; };
+// Regel zu einem Winkel: Name und der Winkel, auf den sie sich bezieht. Ausgangspunkt ist der gegebene Winkel.
+function regel(k, i) {
+  const { gk, gi } = CF, d = (i - gi + 4) % 4;
+  if (k === gk) return [d === 2 ? 'Scheitelwinkel zu' : 'Nebenwinkel zu', gk, gi];
+  if (d === 0) return ['Stufenwinkel zu', gk, gi];
+  if (d === 2) return ['Wechselwinkel zu', gk, gi];
+  return ['Stufenwinkel zu', gk, i];
 }
 function linien() {
-  let s = seg(P(-100, GY), P(900, GY)) + seg(P(-100, HY), P(900, HY));
-  TS.forEach((T, t) => { const c = pts(T)[0]; s += xline(c, T.w) + text(P(c.x + (GY - 30) / Math.tan(rad(T.w)) - 28, 30), LN[t]); });
-  return s + text(P(770, GY - 26), 'g') + text(P(770, HY - 26), 'h') + text(P(60, 30), 'g ∥ h', 'ts');
+  const cs = kreuz(); let s = '';
+  cs.forEach((c, k) => { s += seg(P(-100, c.y), P(900, c.y)) + text(P(770, c.y - 26), 'gh'[k]); });
+  const c = cs[0];
+  return s + xline(c, CF.w) + text(P(c.x + (c.y - 30) / Math.tan(rad(CF.w)) - 28, 30), 'f') + (CF.one ? '' : text(P(60, 30), 'g ∥ h', 'ts'));
 }
-// Welche Regel verbindet zwei Winkel? Die sechs Paare von Blatt Aufgabe 4, a bis f.
+function wFig() {
+  let s = '';
+  kreuz().forEach((c, k) => spans(CF.w).forEach((sp, i) => {
+    const giv = k === CF.gk && i === CF.gi, on = giv || vis(k + ',' + i);
+    s += wedge(c, sp[0], sp[1], CF.one ? 70 : 54, on ? farbe(i) : 'n', giv ? `${nam(k, i)} = ${wert(i)}°` : on ? wert(i) + '°' : nam(k, i), 'tx', 150);
+  }));
+  return s + linien();
+}
+function wHit(p) {
+  let best = null, bd = 150;
+  kreuz().forEach((c, k) => { const d = dist(p, c); if (d < bd) { bd = d; best = [k, c]; } });
+  if (!best) return null;
+  const [k, c] = best, x = dirOf(c, p), i = x < CF.w ? 0 : x < 180 ? 1 : x < 180 + CF.w ? 2 : 3;
+  if (k === CF.gk && i === CF.gi) return null;
+  return last = k + ',' + i;
+}
+function wEq() {
+  if (!last || !vis(last)) return '';
+  const [k, i] = last.split(',').map(Number), [r, k2, i2] = regel(k, i);
+  return `${kg(farbe(i), nam(k, i))} = ${kz(farbe(i), wert(i))} &nbsp;&nbsp; ${r} ${kg(farbe(i2), nam(k2, i2))}`;
+}
+// Folie zu einer Blattaufgabe: Antippen deckt den Winkel auf, unten steht die Regel dazu.
+const wStep = (t, w, gk, gi, one, more = {}) => ({ t, rv: 1, parts: keys(one).filter(x => x !== gk + ',' + gi), hit: wHit,
+  enter: () => { CF = { w, gk, gi, one }; last = null; }, fig: wFig, eq: wEq, each: m => m({ eq: 'α' }), ...more });
+
+// Aufgabe 4: Welche Regel verbindet zwei Winkel? Die sechs Paare a bis f im Bild von Aufgabe 2.
 const PAARE = [[0, 0, 0, 2, 'Scheitelwinkel'], [0, 0, 0, 1, 'Nebenwinkel'], [0, 0, 1, 0, 'Stufenwinkel'], [0, 0, 1, 2, 'Wechselwinkel'], [0, 1, 1, 1, 'Stufenwinkel'], [0, 3, 1, 1, 'Wechselwinkel']];
 function paarFig() {
   const [k1, i1, k2, i2] = PAARE[pair % 6]; let s = '';
-  pts(TS[0]).forEach((c, k) => spans(TS[0].w).forEach((sp, i) => {
-    s += wedge(c, sp[0], sp[1], 54, (k === k1 && i === i1) || (k === k2 && i === i2) ? farbe(i) : 'n', name(0, k, i), 'tx', 150);
+  kreuz().forEach((c, k) => spans(CF.w).forEach((sp, i) => {
+    s += wedge(c, sp[0], sp[1], 54, (k === k1 && i === i1) || (k === k2 && i === i2) ? farbe(i) : 'n', nam(k, i), 'tx', 150);
   }));
   return s + linien();
 }
 function paarEq() {
   const [k1, i1, k2, i2, r] = PAARE[pair % 6];
-  return `${kg(farbe(i1), name(0, k1, i1))} und ${kg(farbe(i2), name(0, k2, i2))} &nbsp;&nbsp; ${vis('r') ? r : '?'}`;
+  return `${kg(farbe(i1), nam(k1, i1))} und ${kg(farbe(i2), nam(k2, i2))} &nbsp;&nbsp; ${vis('r') ? r : '?'}`;
 }
 const paarNeu = () => { pair++; opened = new Set(); shown = false; sub = 0; };
-function parHit(p) {
-  let best = null, bd = 150;
-  TS.forEach((T, t) => pts(T).forEach((c, k) => { const d = dist(p, c); if (d < bd) { bd = d; best = [t, k, c]; } }));
-  if (!best) return null;
-  const [t, k, c] = best, x = dirOf(c, p), w = TS[t].w, i = x < w ? 0 : x < 180 ? 1 : x < 180 + w ? 2 : 3;
-  if (!k && !i) return null;
-  return last = kk(t, k, i);
-}
-function regelEq() {
-  if (!last || !vis(last)) return '';
-  const [t, k, i] = last.split(',').map(Number), [r, k2, i2] = REGEL[k + ',' + i];
-  return `${kg(farbe(i), name(t, k, i))} = ${kz(farbe(i), wert(t, i))} &nbsp;&nbsp; ${r} ${kg(farbe(i2), name(t, k2, i2))}`;
-}
-// Eine schräge Gerade durch die Bildmitte
-const eine = w => { TS = [{ x: 400 + (260 - GY) / Math.tan(rad(w)), w }]; last = null; };
-function neu8() { let w; do w = zehn(5, 13); while (w === TS[0].w); eine(w); opened = new Set(); shown = false; sub = 0; }
+
+// Aufgabe 6: zwei Bilder mit Stufenwinkeln, parallel oder nicht. Die Zellen vom Quiz, größer und in der Bildmitte.
+const SET6 = [['P', 70, 70], ['P', 60, 50]], Z6 = 1.3, X6 = (800 - 2 * CW * Z6) / 2, Y6 = (520 - CH * Z6) / 2;
+function hit6(p) { const x = (p.x - X6) / Z6, y = (p.y - Y6) / Z6; return x >= 0 && x < 2 * CW && y >= 0 && y < CH ? 'q' + Math.floor(x / CW) : null; }
+
 const onGo = () => { last = null; T0 = STEPS[step].timer || 300; tReset(); };
 
 const STEPS = [
   quizStep('1. Quiz ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile 1. Quiz ein.'),
-  { t: 'Ein Winkel reicht für alle acht', rv: 1, timer: 720, parts: alle(1), hit: parHit, enter: () => eine(70), btns: [{ l: tLabel, f: tToggle }, { l: 'Neue Aufgabe', f: neu8 }],
-    fig: parFig, eq: regelEq, each: m => m({ eq: 'α' }), txt: 'Wie groß ist der Winkel? Welche Regel hilft?' },
-  { t: 'Welche Regel?', rv: 1, timer: 720, parts: ['r'], hit: () => 'r', enter: () => eine(50), btns: [{ l: tLabel, f: tToggle }, { l: 'Nächstes Paar', f: paarNeu }],
-    fig: paarFig, eq: paarEq, txt: () => 'Blatt, Aufgabe 4 ' + 'abcdef'[pair % 6] + ')' },
+  wStep('Aufgabe 1', 50, 0, 0, true, { timer: 900, btns: [TBTN], txt: 'Jetzt Aufgabe 1 und 2 auf dem Blatt.' }),
+  wStep('Aufgabe 2', 50, 0, 1, false),
+  { t: 'Aufgabe 4', rv: 1, timer: 1200, parts: ['r'], hit: () => 'r', enter: () => { CF = { w: 50, gk: -1, gi: -1, one: false }; }, btns: [TBTN, { l: 'Nächstes Paar', f: paarNeu }],
+    fig: paarFig, eq: paarEq, txt: () => pair ? 'abcdef'[pair % 6] + ') Welche Regel?' : 'Jetzt Aufgabe 3 bis 6 auf dem Blatt.' },
+  wStep('Aufgabe 5', 110, 1, 2, false),
+  { t: 'Aufgabe 6', rv: 1, parts: ['q0', 'q1'], hit: hit6, enter: () => { quiz = SET6; },
+    fig: () => `<g transform="translate(${f(X6)} ${f(Y6)}) scale(${Z6})">${cellFig(0, 1) + cellFig(1, 1)}</g>` },
   quizStep('2. Quiz ohne Hilfen', SETB, 'Trag deine Ergebnisse in die Zeile 2. Quiz ein. Wie viele sind richtig?'),
 ];
 
