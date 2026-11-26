@@ -64,15 +64,21 @@ svg .curb{fill:#c9c6bd}
 svg .strp{stroke:#fff;stroke-width:9}
 svg .strd{stroke:#fff;stroke-width:6;stroke-dasharray:18 12;opacity:.85}
 svg .tk{fill:#fff;font:700 30px system-ui,sans-serif}
-#timer{position:fixed;top:14px;right:16px;font-size:clamp(40px,7vw,92px);line-height:1;font-weight:800;font-variant-numeric:tabular-nums;padding:.12em .26em;border-radius:.2em;border:3px solid var(--line);background:var(--btn);cursor:pointer}
-#timer.an{background:var(--c1);border-color:var(--c1);color:#fff}
-#timer.knapp{background:var(--c2);border-color:var(--c2);color:#fff}
-#timer.aus{background:#d81e1e;border-color:#d81e1e;color:#fff;animation:blink 1s steps(2,start) 8}
+/* Zeichnung links, Timer als Ring mittig rechts daneben. Hochkant steht der Ring über der Zeichnung. */
+#stage{flex:1;min-height:0;display:flex;align-items:center;gap:16px}
+#stage #fig{flex:1;min-width:0;height:100%}
+#timer{flex:none;width:min(27vw,46vh);cursor:pointer}
+#timer svg{display:block;width:100%}
+#timer .rt{fill:none;stroke:var(--line);stroke-width:13}
+#timer .rp{fill:none;stroke:var(--c1);stroke-width:13;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+#timer .rz{fill:var(--fg);font:800 50px system-ui,sans-serif;font-variant-numeric:tabular-nums}
+#timer.knapp .rp{stroke:var(--c2)}
+#timer.knapp .rz{fill:var(--c2)}
+#timer.aus .rp{stroke:#d81e1e}
+#timer.aus .rz{fill:#d81e1e}
+#timer.aus{animation:blink 1s steps(2,start) 8}
 @keyframes blink{to{visibility:hidden}}
-#tbar{position:fixed;left:0;top:0;height:10px;width:100%;background:var(--c1);transform-origin:left}
-#tbar.knapp{background:var(--c2)}
-#tbar.aus{background:#d81e1e}
-body.hasT h1{display:flex;align-items:center;padding-right:calc(clamp(40px,7vw,92px)*3.5);min-height:calc(clamp(40px,7vw,92px)*1.24 + 14px)}
+@media (max-aspect-ratio:1/1){#stage{flex-direction:column}#stage #fig{width:100%;height:auto;min-height:0}#timer{width:min(34vw,20vh)}}
 svg .cell{fill:none;stroke:var(--line);stroke-width:2}
 svg .rl{fill:var(--fg);font:600 19px system-ui,sans-serif}
 svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
@@ -80,9 +86,7 @@ svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
 </head>
 <body>
 <h1 id="title"></h1>
-<div id="tbar" hidden></div>
-<div id="timer" hidden title="Tippen setzt den Timer zurück"></div>
-<svg id="fig" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg"></svg>
+<div id="stage"><svg id="fig" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg"></svg><div id="timer" hidden title="Tippen setzt den Timer zurück"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle class="rt" cx="100" cy="100" r="86"/><circle class="rp" id="tring" cx="100" cy="100" r="86" transform="rotate(-90 100 100)"/><text class="rz" id="tzeit" x="100" y="103" text-anchor="middle" dominant-baseline="central"></text></svg></div></div>
 <div id="txt"></div>
 <div id="eq"></div>
 <footer>
@@ -192,15 +196,16 @@ function cellFig(i) {
 }
 const quizFig = () => QK.map((k, i) => cellFig(i)).join('');
 const quizHit = p => 'q' + (clamp(Math.floor(p.x / CW), 0, 2) + 3 * clamp(Math.floor(p.y / CH), 0, 1));
-// ---------- Timer oben rechts. Die Dauer in Sekunden steht je Folie in st.timer. ----------
+// ---------- Timer neben der Zeichnung. Die Dauer in Sekunden steht je Folie in st.timer. ----------
 // Knopf: starten, anhalten, weiter. Bei 0:00 piept es dreimal. Tippen auf die Zeit setzt zurück.
 let T0 = 300, tLeft = T0, tEnd = 0, tInt = null, ac = null;
-// Blau: läuft. Orange: letzte Minute. Rot und blinkend: Zeit um. Der Balken oben schrumpft mit der Restzeit.
+// Ring blau: Restzeit. Orange: letzte Minute. Rot und blinkend: Zeit um.
+const TC = 2 * Math.PI * 86;
 function tShow() {
-  const e = $('timer'), b = $('tbar'), z = tLeft === 0 ? 'aus' : tLeft <= 60 && tLeft < T0 ? 'knapp' : tInt ? 'an' : '';
-  e.textContent = Math.floor(tLeft / 60) + ':' + String(tLeft % 60).padStart(2, '0');
-  e.className = z; b.className = z;
-  b.style.transform = `scaleX(${tLeft === 0 ? 1 : tInt ? Math.max(0, tEnd - Date.now()) / (T0 * 1000) : tLeft / T0})`;
+  const fr = tLeft === 0 ? 1 : tInt ? Math.max(0, tEnd - Date.now()) / (T0 * 1000) : tLeft / T0;
+  $('tzeit').textContent = Math.floor(tLeft / 60) + ':' + String(tLeft % 60).padStart(2, '0');
+  $('timer').className = tLeft === 0 ? 'aus' : tLeft <= 60 && tLeft < T0 ? 'knapp' : '';
+  $('tring').style.strokeDasharray = TC; $('tring').style.strokeDashoffset = TC * (1 - fr);
 }
 function tStop() { if (tInt) { clearInterval(tInt); tInt = null; } }
 function tReset() { tStop(); tLeft = T0; tShow(); }
@@ -326,7 +331,7 @@ function reserve(st) {
 const grow = () => BOX.forEach(id => { const e = $(id), h = e.offsetHeight; if (h > parseFloat(e.style.minHeight || 0)) e.style.minHeight = h + 'px'; });
 function render() {
   const st = STEPS[step];
-  $('timer').hidden = $('tbar').hidden = !st.timer; document.body.classList.toggle('hasT', !!st.timer); tShow();
+  $('timer').hidden = !st.timer; tShow();
   if (shownStep !== step) reserve(st);
   $('fig').innerHTML = st.fig();
   put(st); grow();
