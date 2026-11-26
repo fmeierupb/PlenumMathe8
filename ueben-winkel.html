@@ -66,7 +66,7 @@ svg .strd{stroke:#fff;stroke-width:6;stroke-dasharray:18 12;opacity:.85}
 svg .tk{fill:#fff;font:700 30px system-ui,sans-serif}
 #timer{position:fixed;top:12px;right:16px;font-size:clamp(26px,4.2vw,52px);line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer}
 #timer.aus{color:#d81e1e}
-body.hasT h1{padding-right:3.2em}
+body.hasT h1{padding-right:3.6em}
 svg .cell{fill:none;stroke:var(--line);stroke-width:2}
 svg .rl{fill:var(--fg);font:600 19px system-ui,sans-serif}
 svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
@@ -185,10 +185,9 @@ function cellFig(i) {
 }
 const quizFig = () => QK.map((k, i) => cellFig(i)).join('');
 const quizHit = p => 'q' + (clamp(Math.floor(p.x / CW), 0, 2) + 3 * clamp(Math.floor(p.y / CH), 0, 1));
-// ---------- Timer für die beiden Quiz: 5 Minuten, oben rechts ----------
+// ---------- Timer oben rechts. Die Dauer in Sekunden steht je Folie in st.timer. ----------
 // Knopf: starten, anhalten, weiter. Bei 0:00 piept es dreimal. Tippen auf die Zeit setzt zurück.
-const T0 = 300;
-let tLeft = T0, tEnd = 0, tInt = null, ac = null;
+let T0 = 300, tLeft = T0, tEnd = 0, tInt = null, ac = null;
 function tShow() { const e = $('timer'); e.textContent = Math.floor(tLeft / 60) + ':' + String(tLeft % 60).padStart(2, '0'); e.classList.toggle('aus', tLeft === 0); }
 function tStop() { if (tInt) { clearInterval(tInt); tInt = null; } }
 function tReset() { tStop(); tLeft = T0; tShow(); }
@@ -204,9 +203,9 @@ function tToggle() {
   try { const C = window.AudioContext || window.webkitAudioContext; ac = ac || new C(); ac.resume(); } catch (e) {}
   tEnd = Date.now() + tLeft * 1000; tInt = setInterval(tTick, 250);
 }
-const tLabel = () => tInt ? 'Timer anhalten' : tLeft === 0 ? 'Timer zurücksetzen' : tLeft < T0 ? 'Timer weiter' : 'Timer 5 min';
+const tLabel = () => tInt ? 'Timer anhalten' : tLeft === 0 ? 'Timer zurücksetzen' : tLeft < T0 ? 'Timer weiter' : `Timer ${T0 / 60} min`;
 $('timer').addEventListener('click', () => { tReset(); render(); });
-const quizStep = (t, set, txt) => ({ t, rv: 1, timer: 1, parts: QK, hit: quizHit, enter: () => { quiz = set; }, btns: [{ l: tLabel, f: tToggle }, { l: 'Neue Aufgaben', f: newQuiz }], fig: quizFig, txt });
+const quizStep = (t, set, txt) => ({ t, rv: 1, timer: 300, parts: QK, hit: quizHit, enter: () => { quiz = set; }, btns: [{ l: tLabel, f: tToggle }, { l: 'Neue Aufgaben', f: newQuiz }], fig: quizFig, txt });
 
 // ---------- Parallelen g und h mit einer oder zwei schrägen Geraden ----------
 const GY = 130, HY = 390, NM = ['α', 'β', 'γ', 'δ'], SUB = ['₁', '₂', '₃', '₄'], LN = ['f', 'j'];
@@ -249,13 +248,13 @@ function regelEq() {
 // Eine schräge Gerade durch die Bildmitte
 const eine = w => { TS = [{ x: 400 + (260 - GY) / Math.tan(rad(w)), w }]; last = null; };
 function neu8() { let w; do w = zehn(5, 13); while (w === TS[0].w); eine(w); opened = new Set(); shown = false; sub = 0; }
-const onGo = () => { last = null; tReset(); };
+const onGo = () => { last = null; T0 = STEPS[step].timer || 300; tReset(); };
 
 const STEPS = [
   quizStep('1. Quiz ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile 1. Quiz ein.'),
-  { t: 'Ein Winkel reicht für alle acht', rv: 1, parts: alle(1), hit: parHit, enter: () => eine(70), btns: [{ l: 'Neue Aufgabe', f: neu8 }],
+  { t: 'Ein Winkel reicht für alle acht', rv: 1, timer: 720, parts: alle(1), hit: parHit, enter: () => eine(70), btns: [{ l: tLabel, f: tToggle }, { l: 'Neue Aufgabe', f: neu8 }],
     fig: parFig, eq: regelEq, each: m => m({ eq: 'α' }), txt: 'Wie groß ist der Winkel? Welche Regel hilft?' },
-  { t: 'Zwei Geraden schneiden die Parallelen', rv: 1, parts: alle(2), hit: parHit, enter: () => { TS = [{ x: 275, w: 60 }, { x: 585, w: 110 }]; last = null; },
+  { t: 'Zwei Geraden schneiden die Parallelen', rv: 1, timer: 720, btns: [{ l: tLabel, f: tToggle }], parts: alle(2), hit: parHit, enter: () => { TS = [{ x: 275, w: 60 }, { x: 585, w: 110 }]; last = null; },
     fig: parFig, eq: regelEq, each: m => m({ eq: 'α' }), txt: 'Blatt, Aufgabe 4' },
   quizStep('2. Quiz ohne Hilfen', SETB, 'Trag deine Ergebnisse in die Zeile 2. Quiz ein. Wie viele sind richtig?'),
 ];
