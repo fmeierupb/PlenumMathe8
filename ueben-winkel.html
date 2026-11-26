@@ -92,7 +92,9 @@ svg .q2{fill:var(--c2);opacity:.7}
 svg .lq{stroke:var(--fg);stroke-width:2.5;stroke-linecap:round;fill:none}
 svg .rl{fill:var(--fg);font:500 26px system-ui,sans-serif}
 svg .tq{fill:var(--fg);font:500 34px system-ui,sans-serif}
-svg .nq{fill:var(--mut);font:500 26px system-ui,sans-serif}
+/* Aufgabennummer: helle Zahl auf dunklem Kreis, damit sie sich klar von den Gradzahlen abhebt */
+svg .nq{fill:var(--bg);font:700 26px system-ui,sans-serif}
+svg .nb{fill:var(--fg)}
 svg .tl{fill:var(--fg);font:500 34px system-ui,sans-serif}
 svg .tm{fill:var(--mut);font:500 28px system-ui,sans-serif}
 svg .cell{fill:none;stroke:var(--line);stroke-width:1}
@@ -195,7 +197,7 @@ function wq(c, a1, a2, cls, label, r, tcls = 'tq') {
 function cellFig(i, plain) {
   const [ty, a, b2] = quiz[i], x0 = (i % 3) * CW, y0 = Math.floor(i / 3) * CH, c = P(x0 + CW / 2, y0 + 152), open = vis('q' + i);
   const one = ty === 'S' || ty === 'N', r = one ? 32 : 28;
-  let s = `<rect class="cell" x="${f(x0 + 4)}" y="${y0 + 4}" width="${f(CW - 8)}" height="${CH - 8}" rx="14"/>` + (plain ? '' : text(P(x0 + 26, y0 + 27), i + 1, 'nq'));
+  let s = `<rect class="cell" x="${f(x0 + 4)}" y="${y0 + 4}" width="${f(CW - 8)}" height="${CH - 8}" rx="14"/>` + (plain ? '' : `<circle class="nb" cx="${f(x0 + 28)}" cy="${y0 + 28}" r="18"/>` + text(P(x0 + 28, y0 + 29), i + 1, 'nq'));
   // gegeben: blau. gefragt: rot mit rotem Fragezeichen, aufgedeckt in der Farbe gleich großer Winkel.
   const giv = (p, a1, a2) => wq(p, a1, a2, 'q1', (a2 - a1) + '°', r);
   const ask = (p, a1, a2) => wq(p, a1, a2, open ? (a2 - a1 === a ? 'q1' : 'q2') : 'fr', open ? (a2 - a1) + '°' : '?', r, open ? 'tq' : 'tq tr');
