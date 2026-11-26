@@ -84,6 +84,7 @@ body.solo #fig{display:none}
 body.solo #stage{justify-content:center}
 body.solo #timer{--d:min(62vw,56vh)}
 @media (max-aspect-ratio:1/1){#stage{flex-direction:column}#stage #fig{width:100%;height:auto;min-height:0}#timer{--d:min(34vw,20vh)}}
+svg .fr{fill:#ef3b3b;opacity:.92}
 svg .cell{fill:none;stroke:var(--line);stroke-width:2}
 svg .rl{fill:var(--fg);font:600 19px system-ui,sans-serif}
 svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
@@ -171,17 +172,17 @@ function newQuiz() {
   opened = new Set(); shown = false; sub = 0;
 }
 // Kleine Winkelfläche mit Beschriftung dicht am Bogen.
-function wq(c, a1, a2, cls, label) {
+function wq(c, a1, a2, cls, label, tcls = 'tx') {
   const r = 26, d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), half = String(label).length * 8.5 + 12;
   const lr = Math.max(r + 24, half / Math.tan(rad(d / 2)));
-  return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label);
+  return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label, tcls);
 }
 function cellFig(i, plain) {
   const [ty, a, b2] = quiz[i], x0 = (i % 3) * CW, y0 = Math.floor(i / 3) * CH, c = P(x0 + CW / 2, y0 + 148), open = vis('q' + i);
   let s = `<rect class="cell" x="${f(x0 + 4)}" y="${y0 + 4}" width="${f(CW - 8)}" height="${CH - 8}" rx="14"/>` + (plain ? '' : text(P(x0 + 24, y0 + 30), i + 1, 'ts'));
-  // gegeben: blau. gefragt: grau mit Fragezeichen, aufgedeckt in der Farbe gleich großer Winkel.
+  // gegeben: blau. gefragt: rot mit rotem Fragezeichen, aufgedeckt in der Farbe gleich großer Winkel.
   const giv = (p, a1, a2) => wq(p, a1, a2, 'c1', (a2 - a1) + '°');
-  const ask = (p, a1, a2) => wq(p, a1, a2, open ? (a2 - a1 === a ? 'c1' : 'c2') : 'n', open ? (a2 - a1) + '°' : '?');
+  const ask = (p, a1, a2) => wq(p, a1, a2, open ? (a2 - a1 === a ? 'c1' : 'c2') : 'fr', open ? (a2 - a1) + '°' : '?', open ? 'tx' : 'tx tr');
   const hl = (p, u = 0) => seg(pol(108, u, p), pol(108, u + 180, p), 'thin');
   let rule = open ? RUL[ty] : '';
   if (ty === 'S' || ty === 'N') {
