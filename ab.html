@@ -38,7 +38,7 @@ html.fs.wide img{height:auto;background:#fff;margin-bottom:12px}
 <main id="pages"><img id="img" alt=""><img id="img2" alt="Seite 2"></main>
 <script>
 'use strict';
-const AB = {"ab-wiederholung": "Wiederholung", "ab-winkel-zeichnen": "Winkel zeichnen", "ab-winkel-geradenkreuzungen": "Winkel an Geradenkreuzungen", "ab-stufenwinkel-wechselwinkel": "Stufenwinkel und Wechselwinkel", "ab-ueben-winkel": "Winkel an Geraden und Parallelen üben", "ab-winkelsumme": "Winkelsumme im Dreieck und Viereck", "ab-mittelsenkrechte-winkelhalbierende": "Mittelsenkrechte und Winkelhalbierende", "ab-umkreis-inkreis": "Umkreis und Inkreis", "ab-dreiecke-konstruieren": "Dreiecke konstruieren: SSS, SWS, WSW"};
+const AB = {"ab-wiederholung": "Wiederholung", "ab-winkel-zeichnen": "Winkel zeichnen", "ab-winkel-geradenkreuzungen": "Winkel an Geradenkreuzungen", "ab-stufenwinkel-wechselwinkel": "Stufenwinkel und Wechselwinkel", "ab-ueben-winkel": "Wiederholung Winkel", "ab-winkelsumme": "Winkelsumme im Dreieck und Viereck", "ab-mittelsenkrechte-winkelhalbierende": "Mittelsenkrechte und Winkelhalbierende", "ab-umkreis-inkreis": "Umkreis und Inkreis", "ab-dreiecke-konstruieren": "Dreiecke konstruieren: SSS, SWS, WSW"};
 const q = new URLSearchParams(location.search).get('n'), n = AB[q] ? q : Object.keys(AB)[0];
 document.getElementById('img').src = 'ab/' + n + '.svg';
 // Seite 2: eigene Rückseite, sonst Kästchen
