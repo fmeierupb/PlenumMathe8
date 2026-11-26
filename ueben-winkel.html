@@ -135,7 +135,7 @@ function outLab(v, p, q, s, cls = 'tx') {
   return text(P(clamp(pt.x, hw + 6, 794 - hw), clamp(pt.y, 18, 502)), s, cls);
 }
 
-// ---------- Sechs kurze Aufgaben: Start und Schluss ----------
+// ---------- Sechs kurze Aufgaben: 1. Quiz am Anfang, 2. Quiz am Ende ----------
 // Drei Spalten, zwei Zeilen. Jede Zelle zeigt einen gegebenen Winkel und ein Fragezeichen. Antippen deckt Ergebnis und Regel auf.
 const CW = 800 / 3, CH = 260, QK = ['q0', 'q1', 'q2', 'q3', 'q4', 'q5'];
 const RUL = { S: 'Scheitelwinkel', N: 'Nebenwinkel', T: 'Stufenwinkel', W: 'Wechselwinkel', TN: 'Stufen, dann Neben' };
@@ -227,12 +227,12 @@ function neu8() { let w; do w = zehn(5, 13); while (w === TS[0].w); eine(w); ope
 const onGo = () => { last = null; };
 
 const STEPS = [
-  quizStep('Start ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile Start ein.'),
+  quizStep('1. Quiz ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile 1. Quiz ein.'),
   { t: 'Ein Winkel reicht für alle acht', rv: 1, parts: alle(1), hit: parHit, enter: () => eine(70), btns: [{ l: 'Neue Aufgabe', f: neu8 }],
     fig: parFig, eq: regelEq, each: m => m({ eq: 'α' }), txt: 'Wie groß ist der Winkel? Welche Regel hilft?' },
   { t: 'Zwei Geraden schneiden die Parallelen', rv: 1, parts: alle(2), hit: parHit, enter: () => { TS = [{ x: 275, w: 60 }, { x: 585, w: 110 }]; last = null; },
     fig: parFig, eq: regelEq, each: m => m({ eq: 'α' }), txt: 'Blatt, Aufgabe 4' },
-  quizStep('Schluss ohne Hilfen', SETB, 'Trag deine Ergebnisse in die Zeile Schluss ein. Wie viele sind richtig?'),
+  quizStep('2. Quiz ohne Hilfen', SETB, 'Trag deine Ergebnisse in die Zeile 2. Quiz ein. Wie viele sind richtig?'),
 ];
 
 // ---------- Ablauf ----------
