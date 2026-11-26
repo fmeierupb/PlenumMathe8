@@ -25,13 +25,13 @@ h1{margin:0;font-size:clamp(26px,4.2vw,52px);line-height:1.15;min-height:1.2em}
 #eq .k.c1{color:var(--c1)}#eq .k.c2{color:var(--c2)}#eq .k.c3{color:var(--c3)}#eq .k.cr{color:#d81e1e}#eq .k.n{color:var(--mut)}
 footer{display:flex;gap:10px;align-items:center;margin-top:10px}
 #extras{display:flex;gap:10px;margin:0 auto}
-button{font:inherit;font-size:clamp(16px,2vw,24px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;cursor:pointer;touch-action:manipulation}
+button{font:inherit;font-size:clamp(24px,2.2vw,28px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;cursor:pointer;touch-action:manipulation}
 button:disabled{opacity:.3}
-#menu{font:inherit;font-size:clamp(16px,2vw,24px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;text-decoration:none}
+#menu{font:inherit;font-size:clamp(24px,2.2vw,28px);color:inherit;background:var(--btn);border:1px solid var(--line);border-radius:12px;padding:12px 18px;text-decoration:none}
 #fs svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.15em}
 #fs .fo,html.fs #fs .fi{display:none}
 html.fs #fs .fo{display:inline}
-#cnt{color:var(--mut);font-size:clamp(14px,1.6vw,20px);min-width:3.5em;text-align:center}
+#cnt{color:var(--mut);font-size:clamp(24px,2.2vw,28px);min-width:3.5em;text-align:center}
 #next{background:var(--c1);border-color:var(--c1);color:#fff;font-weight:700;margin-left:auto}
 footer{flex-wrap:wrap;row-gap:8px}
 #extras{flex-wrap:wrap;justify-content:center}
@@ -69,21 +69,21 @@ svg .tk{fill:#fff;font:700 30px system-ui,sans-serif}
 #stage #fig{flex:1;min-width:0;height:100%}
 #timer{flex:none;position:relative;--d:min(27vw,46vh);width:var(--d);cursor:pointer}
 #timer svg{display:block;width:100%}
-#timer .rt{fill:none;stroke:var(--line);stroke-width:13}
-#timer .rp{fill:none;stroke:var(--c1);stroke-width:13;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
-/* Die Zeit liegt als eigenes Feld über dem Ring und wird darin mittig gesetzt. Das stimmt in jedem Browser, anders als die Grundlinie von SVG-Text. */
-#tzeit{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-top:.1em;font-size:calc(var(--d)*.27);line-height:1;font-weight:800;font-variant-numeric:tabular-nums;color:var(--fg)}
+#timer .rt{fill:none;stroke:var(--line);stroke-width:10}
+#timer .rp{fill:none;stroke:var(--c1);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+/* Die Zeit ist halbfett. Ihre Höhe im Ring wird aus der wirklichen Ziffernhöhe der Schrift berechnet (tMitte), weil jede Schrift die Ziffern anders in die Zeile setzt. */
+#timer .rz{fill:var(--fg);font:600 52px system-ui,sans-serif;font-variant-numeric:tabular-nums}
 #timer.knapp .rp{stroke:var(--c2)}
-#timer.knapp #tzeit{color:var(--c2)}
+#timer.knapp .rz{fill:var(--c2)}
 #timer.aus .rp{stroke:#d81e1e}
-#timer.aus #tzeit{color:#d81e1e}
+#timer.aus .rz{fill:#d81e1e}
 #timer.aus{animation:blink 1s steps(2,start) 8}
 @keyframes blink{to{visibility:hidden}}
 /* Arbeitszeit: nur der Timer, groß in der Bildmitte */
 body.solo #fig{display:none}
 body.solo #stage{justify-content:center}
 body.solo #timer{--d:min(62vw,56vh)}
-@media (max-aspect-ratio:1/1){#stage{flex-direction:column}#stage #fig{width:100%;height:auto;min-height:0}#timer{--d:min(34vw,20vh)}}
+@media (max-aspect-ratio:1/1){#stage{flex-direction:column}#stage #fig{width:100%;height:auto;min-height:0}#timer,body.quiz #timer{--d:min(34vw,20vh)}}
 /* Quizbilder für die letzte Reihe: große Zahlen und klare Farben, aber feine Geraden und Rahmen */
 svg .fr{fill:#ef3b3b;opacity:.85}
 svg .q1{fill:var(--c1);opacity:.8}
@@ -93,7 +93,7 @@ svg .tl{fill:var(--fg);font:700 36px system-ui,sans-serif}
 svg .tm{fill:var(--mut);font:600 28px system-ui,sans-serif}
 svg .cell{fill:none;stroke:var(--line);stroke-width:1.5}
 svg .lq{stroke:var(--fg);stroke-width:3.5;stroke-linecap:round;fill:none}
-svg .rl{fill:var(--fg);font:600 24px system-ui,sans-serif}
+svg .rl{fill:var(--fg);font:600 26px system-ui,sans-serif}
 svg .tq{fill:var(--fg);font:600 36px system-ui,sans-serif}
 svg .nq{fill:var(--mut);font:700 28px system-ui,sans-serif}
 /* Im Quiz bekommt die Zeichnung die Höhe der leeren Rechenzeile dazu, der Ring ist etwas schmaler. */
@@ -104,7 +104,7 @@ svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
 </head>
 <body>
 <h1 id="title"></h1>
-<div id="stage"><svg id="fig" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg"></svg><div id="timer" hidden title="Tippen setzt den Timer zurück"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle class="rt" cx="100" cy="100" r="86"/><circle class="rp" id="tring" cx="100" cy="100" r="86" transform="rotate(-90 100 100)"/></svg><div id="tzeit"></div></div></div>
+<div id="stage"><svg id="fig" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg"></svg><div id="timer" hidden title="Tippen setzt den Timer zurück"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle class="rt" cx="100" cy="100" r="86"/><circle class="rp" id="tring" cx="100" cy="100" r="86" transform="rotate(-90 100 100)"/><text class="rz" id="tzeit" x="100" y="118" text-anchor="middle"></text></svg></div></div>
 <div id="txt"></div>
 <div id="eq"></div>
 <footer>
@@ -168,6 +168,8 @@ function outLab(v, p, q, s, cls = 'tx') {
   return text(P(clamp(pt.x, hw + 6, 794 - hw), clamp(pt.y, 18, 502)), s, cls);
 }
 
+// K: Faktor für die Größe der Beschriftungen im Bild. 1 passt zu den Schriftgrößen im Stil oben.
+const K = 1;
 // ---------- Sechs kurze Aufgaben: 1. Quiz am Anfang, 2. Quiz am Ende ----------
 // Drei Spalten, zwei Zeilen. Jede Zelle zeigt einen gegebenen Winkel und ein Fragezeichen. Antippen deckt Ergebnis und Regel auf.
 const CW = 800 / 3, CH = 260, QK = ['q0', 'q1', 'q2', 'q3', 'q4', 'q5'];
@@ -185,9 +187,9 @@ function newQuiz() {
 }
 // Winkelfläche mit großer Zahl. Die Zahl sitzt so weit außen, dass ihr Kasten zu beiden Schenkeln 12 Abstand hält und keine Gerade berührt.
 function wq(c, a1, a2, cls, label, r, tcls = 'tq') {
-  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), t = String(label), hw = t === '?' ? 10 : (t.length - 1) * 11 + 6.5, hh = 13;
+  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), t = String(label), hw = (t === '?' ? 10 : (t.length - 1) * 11 + 6.5) * K, hh = 13 * K;
   const need = w => (12 + hw * Math.abs(Math.sin(rad(w))) + hh * Math.abs(Math.cos(rad(w)))) / Math.sin(rad(d / 2));
-  const lr = Math.max(r + 22, need(a1), need(a2));
+  const lr = Math.max(r + 22 * K, need(a1), need(a2));
   return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label, tcls);
 }
 function cellFig(i, plain) {
@@ -223,6 +225,19 @@ const quizHit = p => 'q' + (clamp(Math.floor(p.x / CW), 0, 2) + 3 * clamp(Math.f
 let T0 = 300, tLeft = T0, tEnd = 0, tInt = null, ac = null;
 // Ring blau: Restzeit. Orange: letzte Minute. Rot und blinkend: Zeit um.
 const TC = 2 * Math.PI * 86;
+// Grundlinie so legen, dass die Ziffern genau um die Ringmitte stehen: gemessen wird, wie weit eine 0 über und unter die Grundlinie reicht.
+function tMitte() {
+  let y = 118;
+  try {
+    const cs = getComputedStyle($('tzeit')), c = document.createElement('canvas').getContext('2d');
+    c.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const m = c.measureText('0');
+    if (m.actualBoundingBoxAscent > 0) y = 100 + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+  } catch (e) {}
+  $('tzeit').setAttribute('y', y.toFixed(1));
+}
+tMitte();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(tMitte);
 function tShow() {
   const fr = tLeft === 0 ? 1 : tInt ? Math.max(0, tEnd - Date.now()) / (T0 * 1000) : tLeft / T0;
   $('tzeit').textContent = Math.floor(tLeft / 60) + ':' + String(tLeft % 60).padStart(2, '0');
@@ -269,9 +284,9 @@ function regel(k, i) {
 }
 // Winkelfläche mit Beschriftung in Größe 36. Der Kasten der Beschriftung hält zu beiden Schenkeln 12 Abstand.
 function wl(c, a1, a2, r, cls, label) {
-  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), hw = String(label).length * 10.4 + 4, hh = 14;
+  const d = a2 - a1, p1 = pol(r, a1, c), p2 = pol(r, a2, c), hw = (String(label).length * 10.4 + 4) * K, hh = 14 * K;
   const need = w => (12 + hw * Math.abs(Math.sin(rad(w))) + hh * Math.abs(Math.cos(rad(w)))) / Math.sin(rad(d / 2));
-  const lr = Math.max(r + 27, need(a1), need(a2));
+  const lr = Math.max(r + 27 * K, need(a1), need(a2));
   return `<path class="wd ${cls}" d="M${f(c.x)} ${f(c.y)}L${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}Z"/>` + text(pol(lr, a1 + d / 2, c), label, 'tl');
 }
 function linien() {
