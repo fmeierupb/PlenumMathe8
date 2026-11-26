@@ -133,7 +133,11 @@ $\delta = 360^\circ - 80^\circ - 100^\circ - 70^\circ = 110^\circ$}{%
 
 \vspace{1cm}
 
-""" + LUECKE + r"""
+{\Large\bfseries Aufgaben im Heft\par}
+\medskip
+Buch S.\,65 Nr.\,1, 2, 3\par\smallskip
+Buch S.\,66 Nr.\,1, 2, 3, 4\par\smallskip
+Buch S.\,67 Nr.\,1, 2, 3, 4, 5
 \kaestchen
 \end{document}
 """
