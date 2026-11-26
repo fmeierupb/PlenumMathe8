@@ -28,7 +28,7 @@
 % Lücke zum Eintragen
 \newcommand{\lu}{\rule{1.1cm}{0.4pt}}
 \newcommand{\nr}[1]{{\Large\bfseries #1}\quad}
-\renewcommand{\arraystretch}{1.35}
+\renewcommand{\arraystretch}{1.25}
 \raggedright
 
 \begin{document}
@@ -46,7 +46,7 @@
 \vspace{0.55cm}
 
 \begin{minipage}[t]{0.37\textwidth}
-\nr{1} Trage die Winkel ein.\par\bigskip\medskip
+\nr{1} Trage die Winkel ein.\par\medskip
 \centering
 \begin{tikzpicture}[scale=1.15, baseline=(current bounding box.north)]
   \coordinate (S) at (0,0);
@@ -61,14 +61,14 @@ $\gamma = $ \lu & $\delta = $ \lu
 \end{tabular}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.6\textwidth}
-\raggedright\nr{2} $g \parallel h$. Trage die Winkel ein. Schreibe zu drei Winkeln die Regel auf die Rückseite.\par\medskip
+\raggedright\nr{2} $g \parallel h$. Trage die Winkel ein.\par\medskip
 \centering
-\begin{tikzpicture}[scale=1.1, baseline=(current bounding box.north)]
+\begin{tikzpicture}[scale=0.98, baseline=(current bounding box.north)]
   \coordinate (G) at (1.007,1.2); \coordinate (H) at (-1.007,-1.2);
   \vier{G}{50}{1}\vier{H}{50}{2}
   \draw[thick] (-2.7,1.2) -- (2.7,1.2) node[right] {$g$};
   \draw[thick] (-2.7,-1.2) -- (2.7,-1.2) node[right] {$h$};
-  \draw[thick] (230:3.1) -- (50:3.1) node[above right] {$f$};
+  \draw[thick] (230:2.75) -- (50:2.75) node[above right] {$f$};
 \end{tikzpicture}\par\medskip
 \raggedright
 \begin{tabular}{@{}l@{\hspace{0.45em}}l@{\hspace{0.45em}}l@{}}
@@ -78,44 +78,60 @@ $\gamma_2 = $ \lu & $\delta_2 = $ \lu &
 \end{tabular}
 \end{minipage}
 
-\vspace{0.3cm}
+\vspace{0.16cm}
 
 \nr{3} Zeichne auf der Rückseite zwei Parallelen $g$ und $h$ und eine schräge Gerade $f$. Miss einen Winkel und berechne die anderen sieben.\par
 
-\vspace{0.3cm}
+\vspace{0.16cm}
 
-\begin{minipage}[c]{0.62\textwidth}
-\nr{4} $g \parallel h$. Trage die Winkel ein.\par\medskip
-\begin{tikzpicture}[scale=1.08]
-  \coordinate (A) at (-1.9,1.3); \coordinate (B) at (-3.4,-1.3);
-  \coordinate (C) at (2.1,1.3); \coordinate (D) at (3.05,-1.3);
-  \vier{A}{60}{1}\vier{B}{60}{2}\vier{C}{110}{3}\vier{D}{110}{4}
-  \draw[thick] (-4.6,1.3) -- (4.3,1.3) node[right] {$g$};
-  \draw[thick] (-4.6,-1.3) -- (4.3,-1.3) node[right] {$h$};
-  \draw[thick] (-4.05,-2.43) -- (-1.25,2.43) node[above right] {$f$};
-  \draw[thick] (3.46,-2.43) -- (1.69,2.43) node[above left] {$j$};
-\end{tikzpicture}
-\end{minipage}\hfill
-\begin{minipage}[c]{0.37\textwidth}
-\renewcommand{\arraystretch}{1.3}\begin{tabular}{@{}l@{\hspace{0.6em}}l@{}}
-$\alpha_1 = 60^\circ$ & $\alpha_3 = 110^\circ$\\
-$\beta_1 = $ \lu & $\beta_3 = $ \lu\\
-$\gamma_1 = $ \lu & $\gamma_3 = $ \lu\\
-$\delta_1 = $ \lu & $\delta_3 = $ \lu\\
-$\alpha_2 = $ \lu & $\alpha_4 = $ \lu\\
-$\beta_2 = $ \lu & $\beta_4 = $ \lu\\
-$\gamma_2 = $ \lu & $\gamma_4 = $ \lu\\
-$\delta_2 = $ \lu & $\delta_4 = $ \lu
+\nr{4} Welche Regel gilt im Bild von Aufgabe 2? Schreibe Scheitelwinkel, Nebenwinkel, Stufenwinkel oder Wechselwinkel.\par\smallskip
+\newcommand{\rg}{\rule{4.3cm}{0.4pt}}
+\begin{tabular}{@{}l@{\ }l@{\ }l@{\hspace{0.8cm}}l@{\ }l@{\ }l@{}}
+a) & $\alpha_1$ und $\gamma_1$ & \rg & d) & $\alpha_1$ und $\gamma_2$ & \rg\\
+b) & $\alpha_1$ und $\beta_1$ & \rg & e) & $\beta_1$ und $\beta_2$ & \rg\\
+c) & $\alpha_1$ und $\alpha_2$ & \rg & f) & $\delta_1$ und $\beta_2$ & \rg
 \end{tabular}
+
+\vspace{0.16cm}
+
+\newcommand{\kb}{\tikz[baseline=0.02cm]\draw (0,0) rectangle (0.32,0.32);}
+\begin{minipage}[t]{0.5\textwidth}
+\raggedright\nr{5} $g \parallel h$. Trage die Winkel ein.\par\medskip
+\centering
+\begin{tikzpicture}[scale=0.88, baseline=(current bounding box.north)]
+  \coordinate (G) at (-0.437,1.2); \coordinate (H) at (0.437,-1.2);
+  \vier{G}{110}{1}\vier{H}{110}{2}
+  \draw[thick] (-2.7,1.2) -- (2.7,1.2) node[right] {$g$};
+  \draw[thick] (-2.7,-1.2) -- (2.7,-1.2) node[right] {$h$};
+  \draw[thick] (290:2.15) -- (110:2.15) node[above left] {$f$};
+\end{tikzpicture}\par\medskip
+\raggedright
+\begin{tabular}{@{}l@{\hspace{0.45em}}l@{\hspace{0.45em}}l@{}}
+$\alpha_1 = $ \lu & $\beta_1 = $ \lu & $\gamma_1 = $ \lu\\
+$\delta_1 = $ \lu & $\alpha_2 = $ \lu & $\beta_2 = $ \lu\\
+$\gamma_2 = 110^\circ$ & $\delta_2 = $ \lu &
+\end{tabular}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\textwidth}
+\raggedright\nr{6} Sind $g$ und $h$ parallel?\par\medskip
+\begin{tikzpicture}[scale=0.9, baseline=(current bounding box.center)]
+  \coordinate (G) at (0.255,0.7); \coordinate (H) at (-0.255,-0.7);
+  \fill[gray!45] (G) -- ++(0:0.55) arc (0:70:0.55) -- cycle; \fill[gray!45] (H) -- ++(0:0.55) arc (0:70:0.55) -- cycle;
+  \node at ([shift={(33:1.15)}]G) {$70^\circ$}; \node at ([shift={(33:1.15)}]H) {$70^\circ$};
+  \draw[thick] (-1.7,0.7) -- (1.9,0.7) node[right] {$g$}; \draw[thick] (-1.7,-0.7) -- (1.9,-0.7) node[right] {$h$};
+  \draw[thick] (250:1.75) -- (70:1.75) node[above right] {$f$};
+\end{tikzpicture}\hfill
+\begin{tabular}{@{}l@{}}\kb\ ja\\\kb\ nein\end{tabular}\par\smallskip
+\begin{tikzpicture}[scale=0.9, baseline=(current bounding box.center)]
+  \coordinate (G) at (0.404,0.7); \coordinate (H) at (-0.404,-0.7);
+  \fill[gray!45] (G) -- ++(0:0.55) arc (0:60:0.55) -- cycle; \fill[gray!45] (H) -- ++(10:0.55) arc (10:60:0.55) -- cycle;
+  \node at ([shift={(28:1.2)}]G) {$60^\circ$}; \node at ([shift={(34:1.25)}]H) {$50^\circ$};
+  \draw[thick] (-1.7,0.7) -- (1.9,0.7) node[right] {$g$};
+  \draw[thick] ([shift={(190:1.35)}]H) -- ([shift={(10:2.35)}]H) node[right] {$h$};
+  \draw[thick] (240:1.75) -- (60:1.75) node[above right] {$f$};
+\end{tikzpicture}\hfill
+\begin{tabular}{@{}l@{}}\kb\ ja\\\kb\ nein\end{tabular}
 \end{minipage}
-
-\vspace{0.3cm}
-
-\nr{5} $f$ schneidet $g$ und $h$. Zwei Wechselwinkel sind beide $80^\circ$ groß. Sind $g$ und $h$ parallel? Begründe.\par
-
-\vspace{0.3cm}
-
-\nr{6} $g \parallel h$ und $f \parallel j$. Ein Winkel ist $70^\circ$ groß. Zeichne auf der Rückseite und bestimme alle sechzehn Winkel.
 
 \kaestchen
 \end{document}

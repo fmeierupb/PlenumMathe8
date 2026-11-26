@@ -64,9 +64,15 @@ svg .curb{fill:#c9c6bd}
 svg .strp{stroke:#fff;stroke-width:9}
 svg .strd{stroke:#fff;stroke-width:6;stroke-dasharray:18 12;opacity:.85}
 svg .tk{fill:#fff;font:700 30px system-ui,sans-serif}
-#timer{position:fixed;top:12px;right:16px;font-size:clamp(26px,4.2vw,52px);line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer}
-#timer.aus{color:#d81e1e}
-body.hasT h1{padding-right:3.6em}
+#timer{position:fixed;top:14px;right:16px;font-size:clamp(40px,7vw,92px);line-height:1;font-weight:800;font-variant-numeric:tabular-nums;padding:.12em .26em;border-radius:.2em;border:3px solid var(--line);background:var(--btn);cursor:pointer}
+#timer.an{background:var(--c1);border-color:var(--c1);color:#fff}
+#timer.knapp{background:var(--c2);border-color:var(--c2);color:#fff}
+#timer.aus{background:#d81e1e;border-color:#d81e1e;color:#fff;animation:blink 1s steps(2,start) 8}
+@keyframes blink{to{visibility:hidden}}
+#tbar{position:fixed;left:0;top:0;height:10px;width:100%;background:var(--c1);transform-origin:left}
+#tbar.knapp{background:var(--c2)}
+#tbar.aus{background:#d81e1e}
+body.hasT h1{display:flex;align-items:center;padding-right:calc(clamp(40px,7vw,92px)*3.5);min-height:calc(clamp(40px,7vw,92px)*1.24 + 14px)}
 svg .cell{fill:none;stroke:var(--line);stroke-width:2}
 svg .rl{fill:var(--fg);font:600 19px system-ui,sans-serif}
 svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
@@ -74,6 +80,7 @@ svg .gh{stroke:var(--fg);stroke-width:5;stroke-dasharray:18 12;fill:none}
 </head>
 <body>
 <h1 id="title"></h1>
+<div id="tbar" hidden></div>
 <div id="timer" hidden title="Tippen setzt den Timer zurück"></div>
 <svg id="fig" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg"></svg>
 <div id="txt"></div>
@@ -188,7 +195,13 @@ const quizHit = p => 'q' + (clamp(Math.floor(p.x / CW), 0, 2) + 3 * clamp(Math.f
 // ---------- Timer oben rechts. Die Dauer in Sekunden steht je Folie in st.timer. ----------
 // Knopf: starten, anhalten, weiter. Bei 0:00 piept es dreimal. Tippen auf die Zeit setzt zurück.
 let T0 = 300, tLeft = T0, tEnd = 0, tInt = null, ac = null;
-function tShow() { const e = $('timer'); e.textContent = Math.floor(tLeft / 60) + ':' + String(tLeft % 60).padStart(2, '0'); e.classList.toggle('aus', tLeft === 0); }
+// Blau: läuft. Orange: letzte Minute. Rot und blinkend: Zeit um. Der Balken oben schrumpft mit der Restzeit.
+function tShow() {
+  const e = $('timer'), b = $('tbar'), z = tLeft === 0 ? 'aus' : tLeft <= 60 && tLeft < T0 ? 'knapp' : tInt ? 'an' : '';
+  e.textContent = Math.floor(tLeft / 60) + ':' + String(tLeft % 60).padStart(2, '0');
+  e.className = z; b.className = z;
+  b.style.transform = `scaleX(${tLeft === 0 ? 1 : tInt ? Math.max(0, tEnd - Date.now()) / (T0 * 1000) : tLeft / T0})`;
+}
 function tStop() { if (tInt) { clearInterval(tInt); tInt = null; } }
 function tReset() { tStop(); tLeft = T0; tShow(); }
 function beep() {
@@ -228,10 +241,27 @@ function parFig() {
     const key = kk(t, k, i), giv = !k && !i, on = giv || vis(key);
     s += wedge(c, sp[0], sp[1], 54, on ? farbe(i) : 'n', giv ? `${name(t, k, i)} = ${wert(t, i)}°` : on ? wert(t, i) + '°' : name(t, k, i), 'tx', 150);
   })));
-  s += seg(P(-100, GY), P(900, GY)) + seg(P(-100, HY), P(900, HY));
+  return s + linien();
+}
+function linien() {
+  let s = seg(P(-100, GY), P(900, GY)) + seg(P(-100, HY), P(900, HY));
   TS.forEach((T, t) => { const c = pts(T)[0]; s += xline(c, T.w) + text(P(c.x + (GY - 30) / Math.tan(rad(T.w)) - 28, 30), LN[t]); });
   return s + text(P(770, GY - 26), 'g') + text(P(770, HY - 26), 'h') + text(P(60, 30), 'g ∥ h', 'ts');
 }
+// Welche Regel verbindet zwei Winkel? Die sechs Paare von Blatt Aufgabe 4, a bis f.
+const PAARE = [[0, 0, 0, 2, 'Scheitelwinkel'], [0, 0, 0, 1, 'Nebenwinkel'], [0, 0, 1, 0, 'Stufenwinkel'], [0, 0, 1, 2, 'Wechselwinkel'], [0, 1, 1, 1, 'Stufenwinkel'], [0, 3, 1, 1, 'Wechselwinkel']];
+function paarFig() {
+  const [k1, i1, k2, i2] = PAARE[pair % 6]; let s = '';
+  pts(TS[0]).forEach((c, k) => spans(TS[0].w).forEach((sp, i) => {
+    s += wedge(c, sp[0], sp[1], 54, (k === k1 && i === i1) || (k === k2 && i === i2) ? farbe(i) : 'n', name(0, k, i), 'tx', 150);
+  }));
+  return s + linien();
+}
+function paarEq() {
+  const [k1, i1, k2, i2, r] = PAARE[pair % 6];
+  return `${kg(farbe(i1), name(0, k1, i1))} und ${kg(farbe(i2), name(0, k2, i2))} &nbsp;&nbsp; ${vis('r') ? r : '?'}`;
+}
+const paarNeu = () => { pair++; opened = new Set(); shown = false; sub = 0; };
 function parHit(p) {
   let best = null, bd = 150;
   TS.forEach((T, t) => pts(T).forEach((c, k) => { const d = dist(p, c); if (d < bd) { bd = d; best = [t, k, c]; } }));
@@ -254,8 +284,8 @@ const STEPS = [
   quizStep('1. Quiz ohne Heft und Buch', SETA, 'Trag deine sechs Ergebnisse auf dem Blatt in die Zeile 1. Quiz ein.'),
   { t: 'Ein Winkel reicht für alle acht', rv: 1, timer: 720, parts: alle(1), hit: parHit, enter: () => eine(70), btns: [{ l: tLabel, f: tToggle }, { l: 'Neue Aufgabe', f: neu8 }],
     fig: parFig, eq: regelEq, each: m => m({ eq: 'α' }), txt: 'Wie groß ist der Winkel? Welche Regel hilft?' },
-  { t: 'Zwei Geraden schneiden die Parallelen', rv: 1, timer: 720, btns: [{ l: tLabel, f: tToggle }], parts: alle(2), hit: parHit, enter: () => { TS = [{ x: 275, w: 60 }, { x: 585, w: 110 }]; last = null; },
-    fig: parFig, eq: regelEq, each: m => m({ eq: 'α' }), txt: 'Blatt, Aufgabe 4' },
+  { t: 'Welche Regel?', rv: 1, timer: 720, parts: ['r'], hit: () => 'r', enter: () => eine(50), btns: [{ l: tLabel, f: tToggle }, { l: 'Nächstes Paar', f: paarNeu }],
+    fig: paarFig, eq: paarEq, txt: () => 'Blatt, Aufgabe 4 ' + 'abcdef'[pair % 6] + ')' },
   quizStep('2. Quiz ohne Hilfen', SETB, 'Trag deine Ergebnisse in die Zeile 2. Quiz ein. Wie viele sind richtig?'),
 ];
 
@@ -296,7 +326,7 @@ function reserve(st) {
 const grow = () => BOX.forEach(id => { const e = $(id), h = e.offsetHeight; if (h > parseFloat(e.style.minHeight || 0)) e.style.minHeight = h + 'px'; });
 function render() {
   const st = STEPS[step];
-  $('timer').hidden = !st.timer; document.body.classList.toggle('hasT', !!st.timer);
+  $('timer').hidden = $('tbar').hidden = !st.timer; document.body.classList.toggle('hasT', !!st.timer); tShow();
   if (shownStep !== step) reserve(st);
   $('fig').innerHTML = st.fig();
   put(st); grow();
