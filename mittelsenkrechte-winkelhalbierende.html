@@ -63,6 +63,17 @@ svg .road{fill:#5d626b}
 svg .rdl{stroke:#fff;stroke-width:4;stroke-dasharray:26 18}
 svg .hs{fill:var(--mut);opacity:.55}
 svg .win{fill:var(--bg);opacity:.8}
+svg .geo{fill:var(--c1);opacity:.07;stroke:none}
+svg .geoL{stroke:var(--c1);stroke-width:2;fill:none;opacity:.7}
+svg .tick{stroke:var(--c1);stroke-width:1.6;opacity:.8}
+svg .tk{fill:var(--c1);font:600 15px system-ui,sans-serif;opacity:.85}
+svg .tki{fill:var(--mut);font:600 13px system-ui,sans-serif}
+svg .tkb{fill:var(--c1);font:800 24px system-ui,sans-serif}
+svg .tkr{fill:#d81e1e;font:800 24px system-ui,sans-serif}
+svg .gh{stroke:var(--c1);stroke-width:1.4;opacity:.45}
+svg .ghh{stroke:var(--c3);stroke-width:3}
+svg .tkc{fill:var(--c1);font:600 13px system-ui,sans-serif;opacity:.85}
+svg .tkh{fill:var(--c3);font:800 16px system-ui,sans-serif}
 svg .fence{stroke:#8a5a2b;stroke-width:9;stroke-linecap:round}
 svg .grass{fill:var(--c3);opacity:.1}
 svg .stop{fill:#f5c400;stroke:#20140a;stroke-width:2}
@@ -223,8 +234,56 @@ function whCon(k) {
 const whStep = k => ({ t: 'Winkelhalbierende mit dem Zirkel', grp: 'wh', fig: () => whCon(k), eq: () => lines(WHL, k) });
 
 // ---------- Geodreieck ----------
-const geoMs = () => seg(CA, CB) + dot(CA) + dot(CB) + text(P(CA.x - 26, CA.y + 6), 'A') + text(P(CB.x + 26, CB.y + 6), 'B') + dot(P(400, 300)) + text(P(426, 326), 'M') + seg(P(400, 40), P(400, 500), 'hi') + rightMark(P(400, 300), 0);
-const geoWh = () => seg(KS, pol(640, 0, KS)) + seg(KS, pol(470, W, KS)) + dot(KS) + text(P(KS.x - 26, KS.y + 8), 'S') + seg(KS, pol(700, BW, KS), 'hi') + wedge(KS, 0, BW, 110, 'c1', BW + '°') + wedge(KS, BW, W, 110, 'c3', BW + '°');
+// Dasselbe Geodreieck wie in der Stunde Winkel zeichnen.
+function arc(c, a1, a2, r, cls = 'arc') {
+  const d = ((a2 - a1) % 360 + 360) % 360, p1 = pol(r, a1, c), p2 = pol(r, a1 + d, c);
+  return `<path class="${cls}" d="M${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 ${d > 180 ? 1 : 0} 0 ${f(p2.x)} ${f(p2.y)}"/>`;
+}
+// Ganzes Geodreieck: gleichschenklig-rechtwinklig, lange Seite 16 cm, Nullpunkt c in ihrer Mitte, Spitze oben.
+// Doppelt runde Winkelskala: Teilstriche am äußeren Bogen, zwei Zahlenreihen, innerer Bogen darunter.
+// Winkelzahlen 10 bis 170, 0 und 180 stehen auf dem Geodreieck nicht. u: Bildpunkte pro cm.
+// o.at: diese Zahl hervorheben, o.good: 'out' oder 'in' ist die richtige Skala. o.hi: Teile farbig hervorheben.
+const GRo = 5.5, GRi = 3.5;
+function geoTri(c, u, o = {}) {
+  const Q = (x, y) => P(c.x + x * u, c.y - y * u), A = (th, r) => pol(r * u, th, c), hi = o.hi || {};
+  let s = poly([Q(-8, 0), Q(8, 0), Q(0, 8)], 'geo') + poly([Q(-8, 0), Q(8, 0), Q(0, 8)], 'geoL');
+  s += arc(c, 0, 180, GRo * u, 'geoL') + arc(c, 0, 180, GRi * u, 'geoL');
+  for (let h = 1; h <= 3; h += 0.5) { const w = Math.sqrt(GRi * GRi - h * h) - 0.3; s += seg(Q(-w, h), Q(w, h), hi.hilfs ? 'ghh' : 'gh'); }
+  s += seg(Q(0, 0.85), Q(0, GRi), hi.mitte ? 'ghh' : 'gh');
+  for (let i = -70; i <= 70; i++) s += seg(Q(i / 10, 0), Q(i / 10, i % 10 ? (i % 5 ? 0.14 : 0.24) : 0.34), 'tick');
+  for (let i = -7; i <= 7; i++) s += text(Q(i, 0.55), Math.abs(i), hi.cm ? 'tkh' : 'tkc');
+  for (let th = 1; th <= 179; th++) s += seg(A(th, GRo), A(th, GRo - (th % 10 ? (th % 5 ? 0.14 : 0.24) : 0.4)), 'tick');
+  for (let k = 10; k <= 170; k += 10) {
+    if (o.at === k) continue;
+    s += text(A(k, GRo - 0.72), k, hi.aussen ? 'tkh' : 'tk') + text(A(k, GRo - 1.25), 180 - k, hi.innen ? 'tkh' : 'tki');
+  }
+  if (o.at !== undefined) {
+    const k = o.at, gi = o.good === 'in';
+    s += text(A(k, GRo - 0.7), k, gi ? 'tkr' : 'tkb') + text(A(k, GRo - 1.32), 180 - k, gi ? 'tkb' : 'tkr');
+  }
+  return s + circ(c, 5, 'geoL');
+}
+
+// Mittelsenkrechte: AB = 6 cm. u: Bildpunkte pro cm. Das Geodreieck liegt erst mit 0 auf A, dann mit 0 auf M.
+const GU = 36, GA = P(400 - 3 * GU, 430), GB = P(400 + 3 * GU, 430), GM = P(400, 430);
+function geoMs() {
+  let s = '';
+  if (sub === 3) s += seg(P(400, 90), P(400, 475), 'hi') + rightMark(GM, 0);
+  if (sub === 1 || sub === 2) s += geoTri(GA, GU, { hi: { cm: sub === 1 } });
+  if (sub === 3) s += geoTri(GM, GU, { at: 90, good: 'out' }) + dot(pol((GRo + 0.35) * GU, 90, GM), 8, 'mk');
+  s += seg(GA, GB) + dot(GA) + dot(GB) + text(P(GA.x, GA.y + 36), 'A') + text(P(GB.x, GB.y + 36), 'B');
+  if (sub >= 2) s += dot(GM, 8, 'mk') + text(P(GM.x + 28, GM.y + 36), 'M');
+  return s;
+}
+// Winkelhalbierende: Nullpunkt auf S, Zeichenkante auf dem unteren Schenkel.
+const GS = P(400, 440), GU2 = 40;
+function geoWh() {
+  let s = '';
+  if (sub === 3) s += seg(GS, pol(560, BW, GS), 'hi');
+  if (sub >= 1) s += geoTri(GS, GU2, sub === 3 ? { at: BW, good: 'out' } : { at: W, good: 'out' });
+  if (sub === 3) s += dot(pol((GRo + 0.35) * GU2, BW, GS), 8, 'mk');
+  return s + seg(GS, P(790, GS.y)) + seg(GS, pol(340, W, GS)) + dot(GS) + text(P(GS.x - 28, GS.y + 10), 'S');
+}
 
 // ---------- Aufgabe ----------
 let tk = null;
@@ -260,7 +319,7 @@ const STEPS = [
   { t: 'Die Mittelsenkrechte', fig: () => msFig({ line: 1, mid: 1, pt: false }),
     txt: 'Sie geht durch die Mitte M von AB und steht senkrecht auf AB.', eq: () => `AM = MB = ${m(MX - A.x)} m` },
   msStep(1), msStep(2), msStep(3),
-  { t: 'Mittelsenkrechte mit dem Geodreieck', rv: 3, fig: geoMs, eq: () => lines(['AB messen: 6 cm', 'Mitte markieren: 6 cm : 2 = 3 cm', 'Senkrechte durch M zeichnen'], sub) },
+  { t: 'Mittelsenkrechte mit dem Geodreieck', vb: '40 80 720 405', rv: 3, fig: geoMs, eq: () => lines(['AB messen: 6 cm', 'Mitte markieren: 6 cm : 2 = 3 cm', 'Senkrechte durch M zeichnen'], sub) },
   // Die Antwort
   { t: 'Zurück zur Bushaltestelle', rv: 1, fig: () => busFig(shown),
     txt: () => shown ? 'Wo die Mittelsenkrechte die Straße schneidet, ist es von beiden Wohnblocks gleich weit.' : 'Welche Linie hilft uns?',
@@ -271,7 +330,7 @@ const STEPS = [
     txt: () => shown ? 'Alle diese Punkte liegen auf der Winkelhalbierenden. Sie teilt den Winkel in zwei gleich große Teile.' : 'Er soll von beiden Zäunen gleich weit weg stehen. Wo geht das?',
     eq: () => shown ? `${W}° : 2 = ${kz('c1', BW)}` : `Abstand unten: ${cm(d1(Q))} cm &nbsp;&nbsp; oben: ${cm(d2(Q))} cm` },
   whStep(1), whStep(2), whStep(3),
-  { t: 'Winkelhalbierende mit dem Geodreieck', rv: 3, fig: geoWh, eq: () => lines([`Winkel messen: ${W}°`, `Halbieren: ${W}° : 2 = ${kz('c1', BW)}`, `${kz('c1', BW)} antragen und Linie zeichnen`], sub) },
+  { t: 'Winkelhalbierende mit dem Geodreieck', vb: '40 110 760 360', rv: 3, fig: geoWh, eq: () => lines([`Winkel messen: ${W}°`, `Halbieren: ${W}° : 2 = ${kz('c1', BW)}`, `${kz('c1', BW)} antragen und Linie zeichnen`], sub) },
   // Aufgabe
   { t: 'Aufgabe', enter: newTk, fig: tkFig, txt: () => TKQ[tk.k],
     btns: [{ l: 'Auflösen', f: () => { tk.show = !tk.show; } }, { l: 'Neue Aufgabe', f: newTk }], eq: tkEq,
@@ -316,6 +375,7 @@ const grow = () => BOX.forEach(id => { const e = $(id), h = e.offsetHeight; if (
 function render() {
   const st = STEPS[step];
   if (shownStep !== step) reserve(st);
+  $('fig').setAttribute('viewBox', st.vb || '0 0 800 520');
   $('fig').innerHTML = st.fig();
   put(st); grow();
   if (shownStep !== step) {
