@@ -165,6 +165,7 @@ Mit dem Geodreieck: Mitte von $AB$ messen, Senkrechte durch $M$ zeichnen.}{%
   \draw (1.75,0) arc (0:90:0.25); \fill (1.5,0) ++(45:0.15) circle (1pt);
   \draw[thick] (0,0) -- (3,0);
   \fill (0,0) circle (1.6pt) node[left] {$A$}; \fill (3,0) circle (1.6pt) node[right] {$B$}; \fill (1.5,0) circle (1.6pt) node[below right] {$M$};
+  \fill (1.5,1.323) circle (1.6pt); \fill (1.5,-1.323) circle (1.6pt);
 \end{tikzpicture}}
 
 \vspace{1cm}
@@ -184,6 +185,7 @@ Mit dem Geodreieck: Winkel messen, halbieren, Hälfte antragen.}{%
   \draw[very thick] (0,0) -- (35:3.6);
   \draw[thick] (0,0) -- (4,0); \draw[thick] (0,0) -- (70:3.3);
   \fill (0,0) circle (1.6pt) node[left] {$S$};
+  \fill (1.5,0) circle (1.6pt); \fill (70:1.5) circle (1.6pt); \fill (2.013,1.410) circle (1.6pt);
   \node at (17.5:1.12) {$35^\circ$}; \node at (52.5:1.12) {$35^\circ$};
 \end{tikzpicture}}
 
