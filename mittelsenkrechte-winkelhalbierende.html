@@ -159,7 +159,8 @@ function msFig(o = {}) {
   let s = '';
   if (o.line) s += seg(P(MX, -10), P(MX, 530), 'hi') + rightMark(P(MX, A.y), 0);
   if (o.pt !== false) s += seg(Pp, A, 'da') + seg(Pp, B, 'da');
-  s += seg(A, B) + dot(A) + dot(B) + text(P(A.x - 26, A.y + 6), 'A') + text(P(B.x + 26, B.y + 6), 'B');
+  // Wie bei der Bushaltestelle: A und B sind Häuser, die auf ihrem Punkt stehen.
+  s += seg(A, B) + house(P(A.x, A.y - 20), 'A') + house(P(B.x, B.y - 20), 'B') + dot(A) + dot(B);
   if (o.mid) s += dot(P(MX, A.y)) + text(P(MX + 26, A.y + 26), 'M');
   marks.forEach(m => { s += dot(m, 10, 'mk'); });
   if (o.pt !== false) s += dot(Pp, 10) + text(P(Pp.x + 26, Pp.y - 22), 'P');
@@ -248,9 +249,9 @@ const STEPS = [
   { t: 'Wo ist es von A und B gleich weit?', rv: 1, enter: () => { Pp = P(260, 120); marks = []; }, drag: msDrag, up: msUp,
     fig: () => msFig({ line: shown }),
     txt: () => shown ? 'Alle diese Punkte liegen auf einer Geraden. Sie heißt Mittelsenkrechte.' : 'Zieh P an Stellen, die von A und B gleich weit weg sind.',
-    eq: () => `PA = ${cm(dist(Pp, A))} cm &nbsp;&nbsp; PB = ${cm(dist(Pp, B))} cm` },
+    eq: () => `PA = ${km(dist(Pp, A))} km &nbsp;&nbsp; PB = ${km(dist(Pp, B))} km` },
   { t: 'Die Mittelsenkrechte', fig: () => msFig({ line: 1, mid: 1, pt: false }),
-    txt: 'Sie geht durch die Mitte M von AB und steht senkrecht auf AB.', eq: () => `AM = MB = ${cm(MX - A.x)} cm` },
+    txt: 'Sie geht durch die Mitte M von AB und steht senkrecht auf AB.', eq: () => `AM = MB = ${km(MX - A.x)} km` },
   msStep(1), msStep(2), msStep(3),
   { t: 'Mittelsenkrechte mit dem Geodreieck', rv: 3, fig: geoMs, eq: () => lines(['AB messen: 6 cm', 'Mitte markieren: 6 cm : 2 = 3 cm', 'Senkrechte durch M zeichnen'], sub) },
   // Die Antwort
