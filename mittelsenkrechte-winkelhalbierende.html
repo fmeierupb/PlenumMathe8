@@ -62,6 +62,7 @@ svg .ip{fill:var(--c2)}
 svg .road{fill:#5d626b}
 svg .rdl{stroke:#fff;stroke-width:4;stroke-dasharray:26 18}
 svg .hs{fill:var(--mut);opacity:.55}
+svg .win{fill:var(--bg);opacity:.8}
 svg .fence{stroke:#8a5a2b;stroke-width:9;stroke-linecap:round}
 svg .grass{fill:var(--c3);opacity:.1}
 svg .stop{fill:#f5c400;stroke:#20140a;stroke-width:2}
@@ -133,8 +134,14 @@ function outLab(v, p, q, s, cls = 'tx') {
   return text(P(clamp(pt.x, hw + 6, 794 - hw), clamp(pt.y, 18, 502)), s, cls);
 }
 
-const km = px => (Math.round(px / 10) / 10).toFixed(1).replace('.', ',');
-const house = (p, l) => `<rect class="hs" x="${p.x - 22}" y="${p.y - 14}" width="44" height="34"/>` + poly([P(p.x - 28, p.y - 14), P(p.x + 28, p.y - 14), P(p.x, p.y - 40)], 'hs') + text(P(p.x, p.y - 64), l);
+// Maßstab der Bushaltestelle: 1 Bildeinheit = 1 m, auf 10 m gerundet
+const m = px => Math.round(px / 10) * 10;
+// Wohnblock mit Flachdach und Fensterreihen. p ist die Mitte, der Block steht 20 unter p auf dem Boden.
+const house = (p, l) => {
+  let s = `<rect class="hs" x="${p.x - 26}" y="${p.y - 52}" width="52" height="72"/>`;
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) s += `<rect class="win" x="${p.x - 19 + c * 14}" y="${p.y - 45 + r * 16}" width="10" height="9"/>`;
+  return s + text(P(p.x, p.y - 78), l);
+};
 const foot = (p, a, w) => { const ux = Math.cos(rad(w)), uy = -Math.sin(rad(w)), t = (p.x - a.x) * ux + (p.y - a.y) * uy; return P(a.x + t * ux, a.y + t * uy); };
 const rightMark = (c, w, s = 18) => { const p1 = pol(s, w, c), p2 = pol(s * Math.SQRT2, w + 45, c), p3 = pol(s, w + 90, c); return `<polyline class="thin" points="${f(p1.x)},${f(p1.y)} ${f(p2.x)},${f(p2.y)} ${f(p3.x)},${f(p3.y)}"/>`; };
 
@@ -150,7 +157,7 @@ function busFig(sol) {
   s += seg(h, VA, 'da') + seg(h, VB, 'da') + house(VA, 'A') + house(VB, 'B');
   return s + `<rect class="stop" x="${f(h.x - 13)}" y="${RY - 13}" width="26" height="26" rx="5"/>` + text(P(h.x, RY + 50), 'H');
 }
-const busEq = sol => { const h = sol ? P(HX, RY) : H; return `A: ${km(dist(h, VA))} km &nbsp;&nbsp; B: ${km(dist(h, VB))} km`; };
+const busEq = sol => { const h = sol ? P(HX, RY) : H; return `A: ${m(dist(h, VA))} m &nbsp;&nbsp; B: ${m(dist(h, VB))} m`; };
 
 // ---------- Punkte gleich weit von A und B ----------
 const A = P(240, 300), B = P(560, 300), MX = 400;
@@ -243,20 +250,20 @@ const tkEq = () => { const t = tk; if (!t.show) return ''; return { pb: `PB = PA
 
 const STEPS = [
   // Die Frage
-  { t: 'Eine Bushaltestelle für zwei Dörfer', enter: () => { H = P(640, RY); }, drag: (w, p) => { H = P(clamp(p.x, 20, 780), RY); },
+  { t: 'Eine Bushaltestelle für zwei Wohnblocks', enter: () => { H = P(640, RY); }, drag: (w, p) => { H = P(clamp(p.x, 20, 780), RY); },
     fig: () => busFig(false), txt: 'Die Haltestelle H soll von A und von B gleich weit weg sein. Wo muss sie hin?', eq: () => busEq(false) },
   // Mittelsenkrechte
   { t: 'Wo ist es von A und B gleich weit?', rv: 1, enter: () => { Pp = P(260, 120); marks = []; }, drag: msDrag, up: msUp,
     fig: () => msFig({ line: shown }),
     txt: () => shown ? 'Alle diese Punkte liegen auf einer Geraden. Sie heißt Mittelsenkrechte.' : 'Zieh P an Stellen, die von A und B gleich weit weg sind.',
-    eq: () => `PA = ${km(dist(Pp, A))} km &nbsp;&nbsp; PB = ${km(dist(Pp, B))} km` },
+    eq: () => `PA = ${m(dist(Pp, A))} m &nbsp;&nbsp; PB = ${m(dist(Pp, B))} m` },
   { t: 'Die Mittelsenkrechte', fig: () => msFig({ line: 1, mid: 1, pt: false }),
-    txt: 'Sie geht durch die Mitte M von AB und steht senkrecht auf AB.', eq: () => `AM = MB = ${km(MX - A.x)} km` },
+    txt: 'Sie geht durch die Mitte M von AB und steht senkrecht auf AB.', eq: () => `AM = MB = ${m(MX - A.x)} m` },
   msStep(1), msStep(2), msStep(3),
   { t: 'Mittelsenkrechte mit dem Geodreieck', rv: 3, fig: geoMs, eq: () => lines(['AB messen: 6 cm', 'Mitte markieren: 6 cm : 2 = 3 cm', 'Senkrechte durch M zeichnen'], sub) },
   // Die Antwort
   { t: 'Zurück zur Bushaltestelle', rv: 1, fig: () => busFig(shown),
-    txt: () => shown ? 'Wo die Mittelsenkrechte die Straße schneidet, ist es von beiden Dörfern gleich weit.' : 'Welche Linie hilft uns?',
+    txt: () => shown ? 'Wo die Mittelsenkrechte die Straße schneidet, ist es von beiden Wohnblocks gleich weit.' : 'Welche Linie hilft uns?',
     eq: () => shown ? busEq(true) : '' },
   // Winkelhalbierende
   { t: 'Ein Rasensprenger in der Gartenecke', rv: 1, enter: () => { Q = P(560, 330); qmarks = []; }, drag: whDrag, up: whUp,
