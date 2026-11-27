@@ -162,7 +162,7 @@ Mit dem Geodreieck: Mitte von $AB$ messen, Senkrechte durch $M$ zeichnen.}{%
   \draw[gray, thick, dashed] (25:2) arc (25:57:2); \draw[gray, thick, dashed] (-25:2) arc (-25:-57:2);
   \draw[gray, thick, dashed] ([shift={(3,0)}]155:2) arc (155:123:2); \draw[gray, thick, dashed] ([shift={(3,0)}]205:2) arc (205:237:2);
   \draw[very thick] (1.5,-1.9) -- (1.5,1.9);
-  \draw (1.75,0) arc (0:90:0.25); \fill (1.5,0) ++(45:0.11) circle (1pt);
+  \draw (1.75,0) arc (0:90:0.25); \fill (1.5,0) ++(45:0.15) circle (1pt);
   \draw[thick] (0,0) -- (3,0);
   \fill (0,0) circle (1.6pt) node[left] {$A$}; \fill (3,0) circle (1.6pt) node[right] {$B$}; \fill (1.5,0) circle (1.6pt) node[below right] {$M$};
 \end{tikzpicture}}
@@ -237,7 +237,7 @@ Der Radius reicht bis zur Seite, nicht bis zur Ecke.}{%
   \draw[gray, thick] (A) -- (30.32:3.3);
   \draw[gray, thick] (B) -- ++(157.5:3.6);
   \draw[thick] (W) -- (2.073,0);
-  \draw (2.073,0) ++(0.23,0) arc (0:90:0.23); \fill (2.073,0) ++(45:0.1) circle (1pt);
+  \draw (2.073,0) ++(0.23,0) arc (0:90:0.23); \fill (2.073,0) ++(45:0.14) circle (1pt);
   \draw[thick] (A) -- (B) -- (C) -- cycle;
   \fill (W) circle (2pt) node[above right] {$W$};
   \node[below left] at (A) {$A$}; \node[below right] at (B) {$B$}; \node[above] at (C) {$C$};
@@ -365,7 +365,7 @@ Ein Winkel hat einen Scheitelpunkt $S$, zwei Schenkel und einen Winkelbogen. Man
 \medskip
 \newcommand{\wa}[1]{\begin{tikzpicture}[scale=0.42]\fill[gray!35] (0,0) -- (0:0.9) arc (0:#1:0.9) -- cycle;\draw[thick] (1.6,0) -- (0,0) -- (#1:1.6);\fill (0,0) circle (2pt);\end{tikzpicture}}
 \begin{tabular}{@{}*{4}{>{\centering\arraybackslash}p{3.85cm}}@{}}
-\wa{50} & \begin{tikzpicture}[scale=0.42]\draw (0.62,0) arc (0:90:0.62); \fill (45:0.27) circle (1.6pt);\draw[thick] (1.6,0) -- (0,0) -- (0,1.6);\fill (0,0) circle (2pt);\end{tikzpicture} & \wa{130} & \wa{250}\\
+\wa{50} & \begin{tikzpicture}[scale=0.42]\draw (0.62,0) arc (0:90:0.62); \fill (45:0.37) circle (1.6pt);\draw[thick] (1.6,0) -- (0,0) -- (0,1.6);\fill (0,0) circle (2pt);\end{tikzpicture} & \wa{130} & \wa{250}\\
 spitz & rechter Winkel & stumpf & überstumpf\\
 $0^\circ<\alpha<90^\circ$ & $\alpha = 90^\circ$ & $90^\circ<\alpha<180^\circ$ & $180^\circ<\alpha<360^\circ$
 \end{tabular}

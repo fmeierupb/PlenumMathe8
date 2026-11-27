@@ -157,7 +157,7 @@ function arc(c, a1, a2, r, cls = 'arc') {
 }
 // Zeichen für den rechten Winkel an v zwischen den Richtungen w und w + 90°: Winkelbogen mit Punkt, wie im Schulbuch.
 function rmark(v, w, s = 24, c = 'thin') {
-  const r = s * 1.25, a = pol(r, w, v), b = pol(r, w + 90, v), d = pol(r * 0.45, w + 45, v);
+  const r = s * 1.25, a = pol(r, w, v), b = pol(r, w + 90, v), d = pol(r * 0.6, w + 45, v);
   return `<path class="${c}" d="M${f(a.x)} ${f(a.y)}A${r} ${r} 0 0 0 ${f(b.x)} ${f(b.y)}"/><circle cx="${f(d.x)}" cy="${f(d.y)}" r="${s > 30 ? 5 : 4}" style="fill:var(--fg)"/>`;
 }
 // Balken von p nach q mit Dicke th, nach der Seite side (+1 links, −1 rechts der Richtung)

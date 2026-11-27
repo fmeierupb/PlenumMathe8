@@ -154,8 +154,8 @@ const house = (p, l) => {
   return s + text(P(p.x, p.y - 78), l);
 };
 const foot = (p, a, w) => { const ux = Math.cos(rad(w)), uy = -Math.sin(rad(w)), t = (p.x - a.x) * ux + (p.y - a.y) * uy; return P(a.x + t * ux, a.y + t * uy); };
-// Rechter Winkel wie im Schulbuch: Winkelbogen mit Punkt.
-const rightMark = (c, w, s = 18) => { const r = s * 1.6, p1 = pol(r, w, c), p2 = pol(r, w + 90, c), d = pol(r * 0.45, w + 45, c); return `<path class="thin" d="M${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}"/><circle cx="${f(d.x)}" cy="${f(d.y)}" r="3.5" style="fill:var(--fg)"/>`; };
+// Rechter Winkel wie im Schulbuch: Winkelbogen mit Punkt. Der Punkt sitzt im Schwerpunkt der Viertelkreisfläche (0,6 r auf der Winkelhalbierenden).
+const rightMark = (c, w, s = 18) => { const r = s * 1.6, p1 = pol(r, w, c), p2 = pol(r, w + 90, c), d = pol(r * 0.6, w + 45, c); return `<path class="thin" d="M${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}"/><circle cx="${f(d.x)}" cy="${f(d.y)}" r="3.5" style="fill:var(--fg)"/>`; };
 
 // ---------- Bushaltestelle ----------
 const VA = P(170, 130), VB = P(560, 260), RY = 440;
