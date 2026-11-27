@@ -153,7 +153,8 @@ function bisLine(v, p, q) {
   const det = ux * (-ey) - uy * (-ex), t = ((p.x - v.x) * (-ey) - (p.y - v.y) * (-ex)) / det;
   return seg(v, P(v.x + t * ux, v.y + t * uy), 'ms');
 }
-const rightMark = (c, w, s = 18) => { const p1 = pol(s, w, c), p2 = pol(s * Math.SQRT2, w + 45, c), p3 = pol(s, w + 90, c); return `<polyline class="thin" points="${f(p1.x)},${f(p1.y)} ${f(p2.x)},${f(p2.y)} ${f(p3.x)},${f(p3.y)}"/>`; };
+// Rechter Winkel wie im Schulbuch: Winkelbogen mit Punkt.
+const rightMark = (c, w, s = 18) => { const r = s * 1.6, p1 = pol(r, w, c), p2 = pol(r, w + 90, c), d = pol(r * 0.45, w + 45, c); return `<path class="thin" d="M${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}"/><circle cx="${f(d.x)}" cy="${f(d.y)}" r="3.5" style="fill:var(--fg)"/>`; };
 const sideOf = (p, a, b) => Math.sign((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x));
 const inside = (p, T) => { const s0 = sideOf(T[2], T[0], T[1]); return sideOf(p, T[0], T[1]) === s0 && sideOf(p, T[1], T[2]) === sideOf(T[0], T[1], T[2]) && sideOf(p, T[2], T[0]) === sideOf(T[1], T[2], T[0]); };
 const minAng = T => Math.min(...T.map((v, i) => angleAt(v, T[(i + 1) % 3], T[(i + 2) % 3])));

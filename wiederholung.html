@@ -155,10 +155,10 @@ function arc(c, a1, a2, r, cls = 'arc') {
   const d = ((a2 - a1) % 360 + 360) % 360, p1 = pol(r, a1, c), p2 = pol(r, a1 + d, c);
   return `<path class="${cls}" d="M${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 ${d > 180 ? 1 : 0} 0 ${f(p2.x)} ${f(p2.y)}"/>`;
 }
-// Zeichen für den rechten Winkel an v zwischen den Richtungen w und w + 90°
+// Zeichen für den rechten Winkel an v zwischen den Richtungen w und w + 90°: Winkelbogen mit Punkt, wie im Schulbuch.
 function rmark(v, w, s = 24, c = 'thin') {
-  const a = pol(s, w, v), b = pol(s, w + 90, v), m = P(a.x + b.x - v.x, a.y + b.y - v.y);
-  return `<path class="${c}" d="M${f(a.x)} ${f(a.y)}L${f(m.x)} ${f(m.y)}L${f(b.x)} ${f(b.y)}"/>`;
+  const r = s * 1.25, a = pol(r, w, v), b = pol(r, w + 90, v), d = pol(r * 0.45, w + 45, v);
+  return `<path class="${c}" d="M${f(a.x)} ${f(a.y)}A${r} ${r} 0 0 0 ${f(b.x)} ${f(b.y)}"/><circle cx="${f(d.x)}" cy="${f(d.y)}" r="${s > 30 ? 5 : 4}" style="fill:var(--fg)"/>`;
 }
 // Balken von p nach q mit Dicke th, nach der Seite side (+1 links, −1 rechts der Richtung)
 function bar(p, q, th, cls, side = 0) {

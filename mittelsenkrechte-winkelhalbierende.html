@@ -154,7 +154,8 @@ const house = (p, l) => {
   return s + text(P(p.x, p.y - 78), l);
 };
 const foot = (p, a, w) => { const ux = Math.cos(rad(w)), uy = -Math.sin(rad(w)), t = (p.x - a.x) * ux + (p.y - a.y) * uy; return P(a.x + t * ux, a.y + t * uy); };
-const rightMark = (c, w, s = 18) => { const p1 = pol(s, w, c), p2 = pol(s * Math.SQRT2, w + 45, c), p3 = pol(s, w + 90, c); return `<polyline class="thin" points="${f(p1.x)},${f(p1.y)} ${f(p2.x)},${f(p2.y)} ${f(p3.x)},${f(p3.y)}"/>`; };
+// Rechter Winkel wie im Schulbuch: Winkelbogen mit Punkt.
+const rightMark = (c, w, s = 18) => { const r = s * 1.6, p1 = pol(r, w, c), p2 = pol(r, w + 90, c), d = pol(r * 0.45, w + 45, c); return `<path class="thin" d="M${f(p1.x)} ${f(p1.y)}A${r} ${r} 0 0 0 ${f(p2.x)} ${f(p2.y)}"/><circle cx="${f(d.x)}" cy="${f(d.y)}" r="3.5" style="fill:var(--fg)"/>`; };
 
 // ---------- Bushaltestelle ----------
 const VA = P(170, 130), VB = P(560, 260), RY = 440;
@@ -264,15 +265,16 @@ function geoTri(c, u, o = {}) {
   return s + circ(c, 5, 'geoL');
 }
 
-// Mittelsenkrechte: AB = 6 cm. u: Bildpunkte pro cm. Das Geodreieck liegt erst mit 0 auf A, dann mit 0 auf M.
-const GU = 36, GA = P(400 - 3 * GU, 430), GB = P(400 + 3 * GU, 430), GM = P(400, 430);
+// Mittelsenkrechte: AB = 6 cm. GU: Bildpunkte pro cm.
+// Messen: 0 auf A, Zeichenkante auf AB. Senkrechte: Geodreieck gedreht, Mittellinie auf AB, Nullpunkt auf M, an der langen Kante entlang zeichnen.
+// Gedreht ist das Geodreieck 16 cm hoch, deshalb ist GU so gewählt, dass es ins Bild passt.
+const GU = 31, GA = P(400 - 3 * GU, 260), GB = P(400 + 3 * GU, 260), GM = P(400, 260);
 function geoMs() {
   let s = '';
-  if (sub === 3) s += seg(P(400, 90), P(400, 475), 'hi') + rightMark(GM, 0);
   if (sub === 1 || sub === 2) s += geoTri(GA, GU, { hi: { cm: sub === 1 } });
-  if (sub === 3) s += geoTri(GM, GU, { at: 90, good: 'out' }) + dot(pol((GRo + 0.35) * GU, 90, GM), 8, 'mk');
+  if (sub === 3) s += `<g transform="rotate(90 ${GM.x} ${GM.y})">${geoTri(GM, GU, { hi: { mitte: true } })}</g>` + seg(P(400, GM.y - 8 * GU), P(400, GM.y + 8 * GU), 'hi') + rightMark(GM, 90);
   s += seg(GA, GB) + dot(GA) + dot(GB) + text(P(GA.x, GA.y + 36), 'A') + text(P(GB.x, GB.y + 36), 'B');
-  if (sub >= 2) s += dot(GM, 8, 'mk') + text(P(GM.x + 28, GM.y + 36), 'M');
+  if (sub >= 2) s += dot(GM, 8, 'mk') + text(P(GM.x - 28, GM.y + 36), 'M');
   return s;
 }
 // Winkelhalbierende: Nullpunkt auf S, Zeichenkante auf dem unteren Schenkel.
@@ -319,7 +321,7 @@ const STEPS = [
   { t: 'Die Mittelsenkrechte', fig: () => msFig({ line: 1, mid: 1, pt: false }),
     txt: 'Sie geht durch die Mitte M von AB und steht senkrecht auf AB.', eq: () => `AM = MB = ${m(MX - A.x)} m` },
   msStep(1), msStep(2), msStep(3),
-  { t: 'Mittelsenkrechte mit dem Geodreieck', vb: '40 80 720 405', rv: 3, fig: geoMs, eq: () => lines(['AB messen: 6 cm', 'Mitte markieren: 6 cm : 2 = 3 cm', 'Senkrechte durch M zeichnen'], sub) },
+  { t: 'Mittelsenkrechte mit dem Geodreieck', rv: 3, fig: geoMs, eq: () => lines(['AB messen: 6 cm', 'Mitte markieren: 6 cm : 2 = 3 cm', 'Senkrechte durch M zeichnen'], sub) },
   // Die Antwort
   { t: 'Zurück zur Bushaltestelle', rv: 1, fig: () => busFig(shown),
     txt: () => shown ? 'Wo die Mittelsenkrechte die Straße schneidet, ist es von beiden Wohnblocks gleich weit.' : 'Welche Linie hilft uns?',
